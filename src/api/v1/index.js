@@ -8,10 +8,13 @@ router.get("/", (req, res) => {
   res.status(200).json({
     version: "v1",
     methods: [
-      "/user",
-      "/provision"
+      "GET /users",
+      "GET /provision"
     ]
   });
 });
+
+router.use("/users", require("./users.js"));
+router.use("/provision", require("./provision.js"));
 
 module.exports = router;
