@@ -25,12 +25,11 @@ app.use(bodyparser.urlencoded({ extended: true }));
 // Security measures
 app.disable("x-powered-by");
 
-// Connect to DB, load configs and middlewares, and start server
-const db = require("./db").connect(config.db);
+// Connect to DB
+require("./db").connect(config.db);
 
-// Mount DB connection
+// Mount middlewares
 app.use((req, res, next) => {
-  req.db = db;
   req.config = config;
   next();
 });

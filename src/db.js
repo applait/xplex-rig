@@ -36,7 +36,7 @@ let connect = (dbconfig) => {
         }
         timeout = setTimeout(() => {
           dbconn();
-        }, 1000);
+        }, 5000);
       })
       .once("open", () => {
         if (timeout) {
@@ -47,7 +47,6 @@ let connect = (dbconfig) => {
   };
 
   dbconn();
-  return db;
 };
 
 module.exports = {
