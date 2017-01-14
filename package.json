@@ -28,7 +28,8 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
-    "mongoose": "^4.7.5"
+    "mongoose": "^4.7.5",
+    "validator": "^6.2.1"
   },
   "devDependencies": {
     "eslint": "^3.12.2",
