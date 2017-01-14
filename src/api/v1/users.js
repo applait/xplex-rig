@@ -8,6 +8,7 @@ const User = mongoose.model("User");
 
 router.get("/", (req, res) => {
   res.status(200).json({
+    msg: "Users API",
     methods: [
       "POST /new"
     ]
