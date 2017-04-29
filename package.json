@@ -29,13 +29,10 @@
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "mongoose": "^4.7.5",
+    "request": "^2.81.0",
     "validator": "^6.2.1"
   },
   "devDependencies": {
-    "eslint": "^3.12.2",
-    "eslint-config-standard": "^6.2.1",
-    "eslint-plugin-promise": "^3.4.0",
-    "eslint-plugin-standard": "^2.0.1",
     "jshint": "^2.9.4"
   }
 }

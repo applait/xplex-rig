@@ -2,7 +2,8 @@
  * v1 API routes for xplex-internal
  */
 
-var router = require("express").Router();
+let router = require("express").Router();
+const DO = require("../../providers/digital_ocean");
 
 router.get("/", (req, res) => {
   res.status(200).json({
@@ -13,6 +14,14 @@ router.get("/", (req, res) => {
       "GET /users"
     ]
   });
+});
+
+router.use((req, res, next) => {
+  console.log(req.config.digital_ocean.token);
+  req.providers = {
+    DO: new DO(req.config.digital_ocean.token)
+  };
+  next();
 });
 
 router.use("/agents", require("./agents"));
