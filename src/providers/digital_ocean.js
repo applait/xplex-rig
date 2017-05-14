@@ -63,6 +63,13 @@ DigitalOcean.prototype.account = function () {
   return this.make_request({ action: "account" });
 };
 
+/**
+ * Get Digital Ocean user account information
+ */
+DigitalOcean.prototype.keys = function () {
+  return this.make_request({ action: "account/keys" });
+};
+
 
 /**
  * Get information about specific droplet
