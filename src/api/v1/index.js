@@ -17,7 +17,6 @@ router.get("/", (req, res) => {
 });
 
 router.use((req, res, next) => {
-  console.log(req.config.digital_ocean.token);
   req.providers = {
     DO: new DO(req.config.digital_ocean.token)
   };
