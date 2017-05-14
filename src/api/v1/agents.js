@@ -12,6 +12,7 @@ router.get("/", (req, res) => {
   res.status(200).json({
     msg: "Agents API",
     methods: [
+      "POST /create",
       "POST /register",
       "GET /:hostname",
       "POST /:hostname/activate",
@@ -37,6 +38,34 @@ let load_agent = (req, res, next) => {
     next();
   });
 };
+
+let droplet_name = (name="live", region="sgp") => `${name}-${region}.xplex.me`;
+
+router.post("/create", utils.sanitize_all, (req, res) => {
+  req.providers.DO.droplets_create({
+    "name": droplet_name("test", "sgp1"),
+    "region": "sgp1",
+    "size": "512mb",
+    "image": "fedora-25-x64",
+    "ssh_keys": null, // @TODO Add SSH keys
+    "backups": false,
+    "ipv6": true,
+    "user_data": null,
+    "private_networking": true,
+    "volumes": null,
+    "tags": [
+      "xplex-agent",
+      "xplex"
+    ]
+  }).then(function(do_res, do_body) {
+    console.log("Created droplet", do_body);
+    res.status(200).json(do_body);
+  },
+   function (err) {
+     console.log("Error creating droplet", err);
+     res.status(500).json({ msg: "Error creating droplet", err: err });
+   });
+});
 
 router.get("/:hostname", utils.sanitize_all, load_agent, (req, res) => {
   res.status(200).json({
