@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 
 const Agent = mongoose.model("Agent");
 const utils = require("../../utils");
+const agent_manager = require('../../agent_manager');
 
 router.get("/", (req, res) => {
   res.status(200).json({
@@ -84,6 +85,7 @@ router.get("/:hostname", utils.sanitize_all, load_agent, (req, res) => {
 
 router.post("/:hostname/activate", utils.sanitize_all, load_agent, (req, res) => {
   req.agent.active = true;
+  req.agent.updated_at = new Date();
   try {
     req.agent.save();
     res.status(200).json({
@@ -101,6 +103,7 @@ router.post("/:hostname/activate", utils.sanitize_all, load_agent, (req, res) =>
 
 router.post("/:hostname/deactivate", utils.sanitize_all, load_agent, (req, res) => {
   req.agent.active = false;
+  req.agent.updated_at = new Date();
   try {
     req.agent.save();
     res.status(200).json({
@@ -147,6 +150,8 @@ router.post("/register", utils.sanitize_all, utils.required_fields(fields), exis
     console.log(e);
     res.status(500).json({ msg: "Error validating new agent. Try again later." });
   }
+
+  agent_manager.healthcheck_poll(newagent);
 
   res.status(200).json({
     msg: "Agent created",

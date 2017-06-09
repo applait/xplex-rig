@@ -29,7 +29,6 @@ AgentSchema.statics.exists = function (criteria, done) {
       done(err);
       return;
     }
-    console.log(count);
     if (count > 0) {
       done(null, true);
     } else {
