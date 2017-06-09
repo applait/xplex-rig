@@ -15,6 +15,7 @@ Internal API server for xplex.
 - Copy `config.sample.js` to `config.js` and edit values, with DB credentials.
 - Install application dependencies: `npm install`
 - Start server: `npm start`
+- Start agent: `npm run agent`
 
 ## Tests
 

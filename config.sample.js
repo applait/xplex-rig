@@ -9,22 +9,36 @@ module.exports = {
    */
   server: {
     host: "0.0.0.0",
-    port: "8081"
+    port: "8081",
+
+    /**
+     * DB config
+     */
+    db: {
+      mongo_url: "mongodb://127.0.0.1:27017/xplex"
+    },
+
+    /**
+     * Digital Ocean config
+     *
+     * See: https://developers.digitalocean.com/documentation/v2/#authentication
+     */
+    digital_ocean: {
+      token: "xxxx"
+    }
+
   },
 
-  /**
-   * DB config
-   */
-  db: {
-    mongo_url: "mongodb://127.0.0.1:27017/xplex"
-  },
 
   /**
-   * Digital Ocean config
-   *
-   * See: https://developers.digitalocean.com/documentation/v2/#authentication
+   * Agent specific config
    */
-  digital_ocean: {
-    token: "xxxx"
+  agent: {
+
+    /**
+     * URL to xplex-rig server instance's API
+     */
+    server_url: "https://127.0.0.1:8081"
   }
+
 };

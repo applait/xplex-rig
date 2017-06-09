@@ -1,5 +1,5 @@
 /**
- * Main script for xplex Internal API
+ * Server for xplex Internal API (nicknamed, rig)
  */
 
 const express = require("express");
@@ -26,7 +26,7 @@ app.use(bodyparser.urlencoded({ extended: true }));
 app.disable("x-powered-by");
 
 // Connect to DB
-require("./db").connect(config.db);
+require("./db").connect(config.server.db);
 
 // Mount middlewares
 app.use((req, res, next) => {
