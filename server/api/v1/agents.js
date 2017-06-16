@@ -17,7 +17,9 @@ router.get("/", (req, res) => {
       "POST /register",
       "GET /:hostname",
       "POST /:hostname/activate",
-      "POST /:hostname/deactivate"
+      "POST /:hostname/deactivate",
+      "GET /:hostname/slots",
+      "POST /:hostname/slots"
     ]
   });
 });
@@ -68,57 +70,6 @@ router.post("/create", utils.sanitize_all, (req, res) => {
    });
 });
 
-router.get("/:hostname", utils.sanitize_all, load_agent, (req, res) => {
-  res.status(200).json({
-    msg: "Agent information",
-    payload: {
-      hostname: req.agent.hostname,
-      public_address: req.agent.public_address,
-      private_address: req.agent.private_address,
-      capacity: req.agent.capacity,
-      slots_used: req.agent.slots_used,
-      active: req.agent.active
-    }
-  });
-});
-
-
-router.post("/:hostname/activate", utils.sanitize_all, load_agent, (req, res) => {
-  req.agent.active = true;
-  req.agent.updated_at = new Date();
-  try {
-    req.agent.save();
-    res.status(200).json({
-      msg: "Agent activated",
-      payload: {
-        hostname: req.agent.hostname,
-        active: req.agent.active
-      }
-    });
-  } catch (err) {
-      res.status(500).json({ msg: "Error activating agent. Try again later." });
-  }
-});
-
-
-router.post("/:hostname/deactivate", utils.sanitize_all, load_agent, (req, res) => {
-  req.agent.active = false;
-  req.agent.updated_at = new Date();
-  try {
-    req.agent.save();
-    res.status(200).json({
-      msg: "Agent deactivated",
-      payload: {
-        hostname: req.agent.hostname,
-        active: req.agent.active
-      }
-    });
-  } catch (err) {
-      res.status(500).json({ msg: "Error deactivating agent. Try again later." });
-  }
-});
-
-
 let fields = ["hostname", "public_address", "private_address", "capacity"];
 let exists = (req, res, next) => {
   Agent.exists({ hostname: req.required.hostname }, function (err, exists) {
@@ -134,6 +85,9 @@ let exists = (req, res, next) => {
   });
 };
 
+/**
+ * Endpoint for agents to register themselves with rig's server
+ */
 router.post("/register", utils.sanitize_all, utils.required_fields(fields), exists, (req, res) => {
   let newagent = new Agent({
     hostname: req.required.hostname,
@@ -161,6 +115,79 @@ router.post("/register", utils.sanitize_all, utils.required_fields(fields), exis
       private_address: newagent.private_address
     }
   });
+});
+
+/**
+ * Get information for agent with given hostname
+ */
+router.get("/:hostname", utils.sanitize_all, load_agent, (req, res) => {
+  res.status(200).json({
+    msg: "Agent information",
+    payload: {
+      hostname: req.agent.hostname,
+      public_address: req.agent.public_address,
+      private_address: req.agent.private_address,
+      capacity: req.agent.capacity,
+      slots_used: req.agent.slots_used,
+      active: req.agent.active
+    }
+  });
+});
+
+/**
+ * Mark specified agent as active
+ */
+router.post("/:hostname/activate", utils.sanitize_all, load_agent, (req, res) => {
+  req.agent.active = true;
+  req.agent.updated_at = new Date();
+  try {
+    req.agent.save();
+    res.status(200).json({
+      msg: "Agent activated",
+      payload: {
+        hostname: req.agent.hostname,
+        active: req.agent.active
+      }
+    });
+  } catch (err) {
+      res.status(500).json({ msg: "Error activating agent. Try again later." });
+  }
+});
+
+/**
+ * Mark specified agent as inactive
+ */
+router.post("/:hostname/deactivate", utils.sanitize_all, load_agent, (req, res) => {
+  req.agent.active = false;
+  req.agent.updated_at = new Date();
+  try {
+    req.agent.save();
+    res.status(200).json({
+      msg: "Agent deactivated",
+      payload: {
+        hostname: req.agent.hostname,
+        active: req.agent.active
+      }
+    });
+  } catch (err) {
+      res.status(500).json({ msg: "Error deactivating agent. Try again later." });
+  }
+});
+
+/**
+ * Get slots information for given agent
+ */
+router.get("/:hostname/slots", (req, res) => {
+  res.status(501).json("Unimplemented");
+});
+
+/**
+ * Update slots information for given agent
+ *
+ * @todo Implement function
+ */
+router.post("/:hostname/slots", (req, res) => {
+  res.status(501).json("Unimplemented");
 });
 
 module.exports = router;
