@@ -2,7 +2,7 @@
 
 These are the data models used by rig-server.
 
-## Stream configuration
+## StreamConfiguration
 
 Stream routing configuration per stream key.
 
