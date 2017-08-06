@@ -29,6 +29,9 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
+    "jsonwebtoken": "^7.4.2",
+    "passport": "^0.3.2",
+    "passport-jwt": "^2.2.1",
     "request": "^2.81.0",
     "sequelize": "^4.4.2",
     "validator": "^8.0.0"
