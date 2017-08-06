@@ -6,10 +6,12 @@ These are the data models used by rig-server.
 
 Stream routing configuration per stream key.
 
-- `key` {string} [primary] - Unique stream key that user specifies
+- `id` {number} [primary] - Programmatically generated StreamConfiguration id
+- `key` {string} [unique] - Unique stream key
 - `routeTo` {array} - Array of destinations to route stream to
     - `[]provider` {string} - Provider name, e.g., `YouTube Live`, `Twitch`
     - `[]streamKey` {string} - User's stream key for given service
+- `allowPublishing` {boolean} - Whether stream key is allowed to publish. Set to `false` when quota has expired.
 - `isLive` {boolean} - Whether stream is currently live
 - `userId` {number} - `belongsTo` reference to user to whom this stream configuration belongs.
 
