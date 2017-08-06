@@ -1,6 +1,7 @@
 # rig-server HTTP API
 
-Version: v1
+- Version: v1
+- Spec status: Experimental
 
 rig-server HTTP API is the interface for frontends and rig-agents to interact with rig. This document states the endpoints exposed by the rig-server HTTP API along with their desired purpose.
 

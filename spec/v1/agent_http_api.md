@@ -1,5 +1,8 @@
 # rig-agent HTTP API
 
+- Version: v1
+- Spec status: Experimental
+
 rig-agents expose a small HTTP 1.1 API through which rig-server and load balancers could interact with them. This document states the REST endpoints exposed by rig-agents:
 
 ## Heartbeat

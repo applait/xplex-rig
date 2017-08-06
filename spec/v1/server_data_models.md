@@ -1,5 +1,8 @@
 # rig-server data models
 
+- Version: v1
+- Spec status: Experimental
+
 These are the data models used by rig-server.
 
 ## StreamConfiguration
