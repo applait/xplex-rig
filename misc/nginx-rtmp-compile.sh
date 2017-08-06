@@ -24,8 +24,9 @@ CONFIG="\
 		--http-scgi-temp-path=/var/cache/nginx/scgi_temp \
 		--user=nginx \
 		--group=nginx \
-        --add-module=${NGINX_RTMP_MODULE_PATH}
-		--with-http_ssl_module
+        --add-module=${NGINX_RTMP_MODULE_PATH} \
+		--with-http_ssl_module \
+		--with-http_stub_status_module \
 		--with-http_v2_module \
 		--with-ipv6"
 
@@ -37,6 +38,7 @@ rm -rf $TMP_DIR/*
 pushd $TMP_DIR
 
 dnf builddep nginx --assumeyes
+dnf install gnupg gcc automake
 
 curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz
 curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc
