@@ -20,6 +20,11 @@ Internal API server for xplex.
 
 - Run: `npm test`
 
+## Specifications
+
+Interface specifications are present in the respective versioned directory:
+ - [**v1 specification**](spec/v1)
+
 ## Components
 
 - HTTP API for communication in both rig-server and rig-agent. TLS for all communications.
