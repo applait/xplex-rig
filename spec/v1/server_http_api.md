@@ -70,3 +70,27 @@ Get information about existing user by user ID
             "username": "chosenusername"
         }
         ```
+
+## Heartbeat
+
+Respond to heartbeat requests
+
+- **URL:** `/heartbeat`
+- **Method:** `GET`
+- **Success Response:**
+
+    - Status Code: `200`
+    - Content:
+        - `msg` {string} - `"Heartbeat"`
+        - `status` {number} - `200`
+        - `payload` {object}
+            - `timestamp` {number} - Current Unix timestamp
+
+    - Example:
+        ```json
+        "msg": "Heartbeat",
+        "status": 200,
+        "payload": {
+            "timestamp": 1502033100533
+        }
+        ```
