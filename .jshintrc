@@ -1,6 +1,0 @@
-{
-  "node": true,
-  "esversion": 6,
-  "maxlen": 120,
-  "eqnull": true
-}

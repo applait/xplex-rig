@@ -12,27 +12,20 @@ module.exports = {
     /**
      * Host and port to run xplex-rig's server on
      */
-    host: "0.0.0.0",
-    port: "8081",
+    host: '0.0.0.0',
+    port: '8081',
 
     /**
-     * DB config
+     * PostgreSQL DB URL
      */
-    db: {
-      mongo_url: "mongodb://127.0.0.1:27017/xplex"
-    },
+    postgres_url: 'postgres://user:pass@localhost/name',
 
     /**
-     * Digital Ocean config
-     *
-     * See: https://developers.digitalocean.com/documentation/v2/#authentication
+     * etcd v2 cluster information
      */
-    digital_ocean: {
-      token: "xxxx"
-    }
+    etcd_v2: null
 
   },
-
 
   /**
    * Agent specific config
@@ -42,12 +35,17 @@ module.exports = {
     /**
      * Host and port to run xplex-rig's agent on
      */
-    port: "9000",
+    port: '9000',
 
     /**
-     * URL to xplex-rig server instance's API
+     * URL to rig-server instance's API
      */
-    server_url: "https://127.0.0.1:8081",
+    rig_server_url: 'https://127.0.0.1:8081',
+
+    /**
+     * etcd v2 cluster information
+     */
+    etcd_v2: null,
 
     /**
      * Public IP address and port (optional) on which media server is connected.
@@ -63,7 +61,7 @@ module.exports = {
      *
      * e.g:, 10.11.12.13:9000
      */
-    private_address: null,
+    private_address: null
   }
 
-};
+}
