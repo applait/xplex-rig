@@ -3,6 +3,8 @@ xplex rig
 
 Internal API server for xplex.
 
+[![CircleCI](https://circleci.com/gh/applait/xplex-rig/tree/master.svg?style=svg&circle-token=e8251cf207d23cb87a38799f6e70f165bc5a1ad7)](https://circleci.com/gh/applait/xplex-rig/tree/master)
+
 ## Pre-requisites
 
 - NodeJS 8.2+
