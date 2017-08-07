@@ -9,7 +9,8 @@ const Sequelize = require('sequelize')
 const { readdirSync } = require('fs')
 const { join } = require('path')
 
-let DB = {}
+let models = {}
+let sequelize
 
 /**
  * Method to call to initiate DB connection
@@ -19,7 +20,7 @@ let DB = {}
  */
 let connect = postgresURL => {
   debug(`[DB] Connecting to DB at ${postgresURL}`)
-  let s = new Sequelize(postgresURL, {
+  sequelize = new Sequelize(postgresURL, {
     dialect: 'postgres',
     logging: i => debug(i)
   })
@@ -29,21 +30,19 @@ let connect = postgresURL => {
       return (file.indexOf('.') !== 0) && (file !== 'index.js')
     })
     .forEach(function (file) {
-      const model = s.import(join(__dirname, 'models', file))
-      DB[model.name] = model
+      const model = sequelize.import(join(__dirname, 'models', file))
+      models[model.name] = model
     })
 
-  Object.keys(DB).forEach(function (modelName) {
-    if ('associate' in DB[modelName]) {
-      DB[modelName].associate(DB)
+  Object.keys(models).forEach(function (modelName) {
+    if ('associate' in models[modelName]) {
+      models[modelName].associate(models)
     }
   })
-
-  DB.sequelize = s
-  DB.Sequelize = Sequelize
 }
 
 module.exports = {
   connect: connect,
-  DB: DB
+  models: models,
+  sequelize: sequelize
 }
