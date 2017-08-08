@@ -44,7 +44,7 @@ module.exports = function (sequelize, DataTypes) {
   }
 
   User.prototype.toJSON = function () {
-    var values = Object.assign({}, this.get())
+    var values = Object.assign({}, this.get({ plain: true }))
 
     delete values.password
     delete values.salt
