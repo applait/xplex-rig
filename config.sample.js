@@ -10,10 +10,14 @@ module.exports = {
   server: {
 
     /**
-     * Host and port to run xplex-rig's server on
+w     * Port to run xplex-rig's server on
      */
-    host: '0.0.0.0',
     port: '8081',
+
+    /**
+     * JWT secret used by the application
+     */
+    jwtsecret: 'i3j8ju391jjijaimskcmascSASD53safassasimij94mo4ooosa44sasaee',
 
     /**
      * PostgreSQL DB URL

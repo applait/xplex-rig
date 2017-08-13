@@ -35,17 +35,12 @@ Any error response has this structure:
 
 - Status Code: `4xx` or `5xx`
 - Content:
-    - `msg` {string} - Generic error message
+    - `msg` {string} - Error message
     - `status` {number} - Same as HTTP status code
-    - `payload` {array<string>} - Array of strings for each error encountered in detail
 
 For example:
 
 ```json
 "msg": "Cannot create user",
-"status": 400,
-"payload": [
-    "username field is required",
-    "email is malformed
-]
+"status": 400
 ```

@@ -18,6 +18,9 @@ try {
 // Instantiate app
 let app = express()
 
+// Set JWT secret
+app.set('jwtsecret', process.env.JWTSECRET || config.server.jwtsecret)
+
 // Enable body-parser
 app.use(bodyparser.json())
 app.use(bodyparser.urlencoded({ extended: true }))
@@ -43,6 +46,23 @@ app.get('/', (req, res) => {
     versions: [
       'v1'
     ]
+  })
+})
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+  var err = new Error('Not Found')
+  err.status = 404
+  next(err)
+})
+
+// error handler
+// no stacktraces leaked to user unless in development environment
+app.use(function (err, req, res, next) {
+  err.status = err.status || 500
+  res.status(err.status).json({
+    msg: err.message,
+    status: err.status
   })
 })
 
