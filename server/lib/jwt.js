@@ -3,6 +3,7 @@
  */
 
 const jwt = require('jsonwebtoken')
+const debug = require('util').debuglog('lib:jwt')
 
 /**
  * Extract token from header
@@ -36,6 +37,9 @@ function jwtVerify (req, secret, jwtopts) {
       return reject(_err)
     }
     jwt.verify(token, secret, jwtopts, function (err, payload) {
+      if (err) {
+        debug('Error decoding token', err.message)
+      }
       if (err || !payload.iss || !payload.ist || ['user', 'client'].indexOf(payload.ist) < 0) {
         const _err = new Error('Invalid token')
         _err.status = 400
@@ -99,6 +103,7 @@ function createUserJWT (userId, secret) {
     }
     jwt.sign(tokenInput, secret, jwtopts, function (err, token) {
       if (err) {
+        debug('Error creating user token', err.message)
         const _err = new Error('Error generating user token')
         _err.status = 500
         return reject(err)
