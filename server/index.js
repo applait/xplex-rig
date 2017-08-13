@@ -4,8 +4,14 @@
 
 const express = require('express')
 const bodyparser = require('body-parser')
-const debug = require('util').debuglog('app')
+const debug = require('debug')('app')
 const db = require('./db')
+const { join } = require('path')
+
+// Expose a `require` shorthand to load modules relative to the `server` module's directory
+global.requireRelative = function (modulePath) {
+  return require(join(__dirname, modulePath))
+}
 
 // Load config
 let config
@@ -62,7 +68,7 @@ db.connect(config.server.postgres_url).then(() => {
   app.use(function (err, req, res, next) {
     err.status = err.status || 500
     res.status(err.status).json({
-      msg: err.message,
+      msg: err.status === 500 ? 'Unable to perform request' : err.message,
       status: err.status
     })
   })

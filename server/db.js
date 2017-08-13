@@ -4,7 +4,7 @@
  * Call `.connect()` once and use the module for the rest of your life
  */
 
-const debug = require('util').debuglog('DB')
+const debug = require('debug')('db')
 const Sequelize = require('sequelize')
 const { readdirSync } = require('fs')
 const { join } = require('path')

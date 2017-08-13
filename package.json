@@ -29,6 +29,7 @@
   "homepage": "https://github.com/applait/xplex-rig#readme",
   "dependencies": {
     "body-parser": "^1.17.2",
+    "debug": "^3.0.0",
     "express": "^4.15.3",
     "jsonwebtoken": "^7.4.2",
     "pg": "^7.1.0",

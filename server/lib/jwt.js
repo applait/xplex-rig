@@ -3,7 +3,7 @@
  */
 
 const jwt = require('jsonwebtoken')
-const debug = require('util').debuglog('lib:jwt')
+const debug = require('debug')('lib:jwt')
 
 /**
  * Extract token from header

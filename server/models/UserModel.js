@@ -18,8 +18,24 @@ const sha512 = function (input, salt) {
 
 module.exports = function (sequelize, DataTypes) {
   var User = sequelize.define('User', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      validate: {
+        isUUID: 4
+      }
+    },
     username: {
       type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+    email: {
+      type: DataTypes.STRING,
+      validate: {
+        isEmail: true
+      },
       allowNull: false,
       unique: true
     },
@@ -32,6 +48,11 @@ module.exports = function (sequelize, DataTypes) {
         this.setDataValue('password', hashed)
         this.setDataValue('salt', salt)
       }
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     },
     salt: {
       type: DataTypes.STRING,

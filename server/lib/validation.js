@@ -35,9 +35,9 @@ let requiredFields = fields => {
     for (let f of fields) {
       let val = req.body[f] || req.query[f] || req.params[f]
       if (!val) {
-        res.status(400).json({
-          msg: `Parameter "${f}" is required`
-        })
+        const _err = new Error(`Parameter "${f}" is required`)
+        _err.status = 400
+        return next(_err)
       } else {
         req.required[f] = val
       }
@@ -48,7 +48,7 @@ let requiredFields = fields => {
 
 // Exports
 module.exports = {
-  sanitize: sanitize,
-  sanitizeAll: sanitizeAll,
-  required_fields: requiredFields
+  sanitize,
+  sanitizeAll,
+  requiredFields
 }
