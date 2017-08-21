@@ -60,6 +60,10 @@ module.exports = function (sequelize, DataTypes) {
     }
   })
 
+  User.associate = function (models) {
+    User.MultiStreamConfigs = User.hasMany(models.MultiStreamConfig)
+  }
+
   User.prototype.checkPassword = function (input) {
     return this.getDataValue('password') === sha512(input, this.getDataValue('salt'))
   }
