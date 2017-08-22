@@ -61,7 +61,7 @@ module.exports = function (sequelize, DataTypes) {
   })
 
   User.associate = function (models) {
-    User.MultiStreamConfigs = User.hasMany(models.MultiStreamConfig)
+    User.MultiStreams = User.hasMany(models.MultiStream)
   }
 
   User.prototype.checkPassword = function (input) {

@@ -1,5 +1,5 @@
 /**
- * Model for storing multi-streaming user configurations
+ * Model for storing user-defined output configurations for `MultiStream`
  */
 
 module.exports = function (sequelize, DataTypes) {
@@ -8,13 +8,14 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false
     },
-    server: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
     key: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    server: {
+      type: DataTypes.STRING,
+      defaultValue: 'default',
+      allowNull: true
     },
     isActive: {
       type: DataTypes.BOOLEAN,
@@ -24,7 +25,7 @@ module.exports = function (sequelize, DataTypes) {
   })
 
   MultiStreamConfig.associate = function (models) {
-    MultiStreamConfig.User = MultiStreamConfig.belongsTo(models.User)
+    MultiStreamConfig.belongsTo(models.MultiStream)
   }
 
   return MultiStreamConfig
