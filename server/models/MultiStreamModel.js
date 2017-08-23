@@ -5,12 +5,9 @@
 module.exports = function (sequelize, DataTypes) {
   var MultiStream = sequelize.define('MultiStream', {
     key: {
-      type: DataTypes.UUID,
+      type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
-      validate: {
-        isUUID: 4
-      }
+      unique: true
     },
     isActive: {
       type: DataTypes.BOOLEAN,

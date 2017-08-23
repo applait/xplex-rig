@@ -86,3 +86,7 @@ db.connect(config.server.postgres_url).then(() => {
       process.exit(1)
     })
 })
+  .catch(err => {
+    console.error(err)
+    process.exit(1)
+  })

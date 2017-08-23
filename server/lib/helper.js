@@ -3,8 +3,9 @@
  */
 
 const validator = require('validator')
+const crypto = require('crypto')
 
-let sanitize = input => {
+const sanitize = input => {
   for (let key of Object.keys(input)) {
     let i = input[key]
     if (typeof i === 'string') {
@@ -16,10 +17,12 @@ let sanitize = input => {
   return input
 }
 
+const isUUIDv4 = input => validator.isUUID(input, 4)
+
 /**
  * Middleware to sanitize inputs
  */
-let sanitizeAll = (req, res, next) => {
+const sanitizeAll = (req, res, next) => {
   if (req.body) req.body = sanitize(req.body)
   if (req.params) req.params = sanitize(req.params)
   if (req.query) req.query = sanitize(req.query)
@@ -29,7 +32,7 @@ let sanitizeAll = (req, res, next) => {
 /**
  * Middleware to ensure required fields are present
  */
-let requiredFields = fields => {
+const requiredFields = fields => {
   return (req, res, next) => {
     req.required = req.required || {}
     for (let f of fields) {
@@ -46,9 +49,31 @@ let requiredFields = fields => {
   }
 }
 
+const sha512 = function (input, salt) {
+  var hash = crypto.createHmac('sha512', salt)
+  hash.update(input)
+  return hash.digest('hex')
+}
+
+const sha1 = function (input, salt) {
+  var hash = crypto.createHmac('sha1', salt)
+  hash.update(input)
+  return hash.digest('hex')
+}
+
+const generateSalt = function () {
+  return crypto.randomBytes(Math.ceil(32 / 2))
+    .toString('hex')
+    .slice(0, 32)
+}
+
 // Exports
 module.exports = {
+  isUUIDv4,
   sanitize,
   sanitizeAll,
-  requiredFields
+  requiredFields,
+  generateSalt,
+  sha512,
+  sha1
 }

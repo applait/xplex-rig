@@ -4,6 +4,7 @@
 
 const jwt = require('jsonwebtoken')
 const debug = require('debug')('lib:jwt')
+const { isUUIDv4 } = require('./helper')
 
 /**
  * Extract token from header
@@ -69,8 +70,8 @@ function verifyUser (req, res, next) {
   }
   jwtVerify(req, req.app.get('jwtsecret'), jwtopts)
     .then(payload => {
-      if (payload.ist !== 'user') {
-        const _err = new Error('Unauthorized')
+      if (payload.ist !== 'user' || !isUUIDv4(payload.iss)) {
+        const _err = new Error('Invalid user authentication token')
         _err.status = 401
         return Promise.reject(_err)
       }

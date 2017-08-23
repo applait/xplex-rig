@@ -6,7 +6,7 @@
 const router = require('express').Router()
 const debug = require('debug')('api:v1:users')
 const usersLib = requireRelative('lib/users')
-const { requiredFields } = requireRelative('lib/validation')
+const { requiredFields } = requireRelative('lib/helper')
 const jwt = requireRelative('lib/jwt')
 
 router.get('/', (req, res) => {

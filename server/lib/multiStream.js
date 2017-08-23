@@ -5,8 +5,8 @@
 
 const { models } = requireRelative('db')
 const debug = require('debug')('lib:multistream')
-const uuid = require('uuid')
 const services = require('./multiStreamServices')
+const { sha1 } = requireRelative('lib/helper')
 
 /**
  * Create a new multi-stream entry for given user
@@ -15,11 +15,22 @@ const services = require('./multiStreamServices')
  * @return {Promise} Resolves to new `MultiStream` instance if successful
  */
 function createMultiStream (userID) {
-  return models.MultiStream.create({
-    key: uuid.v4(),
-    User: userID,
-    isActive: true
+  return models.User.find({
+    where: { id: userID, isActive: true },
+    attributes: ['salt']
   })
+    .then(user => {
+      if (user === null) {
+        const _err = new Error('Invalid user id')
+        _err.status = 401
+        return Promise.reject(_err)
+      }
+      return models.MultiStream.create({
+        key: sha1(`xplex://${userID}@${Date.now()}`, user.salt),
+        UserId: userID,
+        isActive: true
+      })
+    })
     .then(ms => {
       debug(`Created new multi stream for user: ${userID}, streamID: ${ms.id}`)
       return ms
@@ -33,27 +44,43 @@ function createMultiStream (userID) {
 /**
  * Add multi-streaming config for specific multi-stream
  *
+ * @param {string} userID - UserID to check if stream belongs to right user
  * @param {string} streamID - MultiStream ID to add stream config for
  * @param {string} service - A service name as defined in `multiStreamServices` module
  * @param {string} key - Secret key for the service for the user
  * @param {string} [server='default'] - A specific server to route traffic to for given `service`
  * @return {Promise} Resolves to `MultiStreamConfig` instance if successful
  */
-function addMultiStreamConfig (streamID, service, key, server = 'default') {
-  return models.MultiStreamConfig.create({
-    service: service,
-    server: server,
-    key: key,
-    isActive: true,
-    MultiStream: streamID
+function addMultiStreamConfig (userID, streamID, service, key, server = 'default') {
+  return models.MultiStream.find({
+    where: {
+      id: streamID,
+      UserId: userID,
+      isActive: true
+    }
   })
+    .then(ms => {
+      if (ms === null) {
+        const _err = new Error('Invalid user ID or stream ID specified')
+        _err.status = 403
+        return Promise.reject(_err)
+      }
+      return models.MultiStreamConfig.create({
+        service: service,
+        server: server,
+        key: key,
+        isActive: true,
+        MultiStreamId: streamID
+      })
+    })
     .then(msconfig => {
       debug(`Created new multistream config. Stream: ${streamID}, service: ${service}`)
-      return msconfig
+      return Promise.resolve(msconfig)
     })
     .catch(err => {
+      debug(err)
       debug(`Error creating multistream config. Stream: ${streamID}, service: ${service}`)
-      return err
+      return Promise.reject(err)
     })
 }
 
@@ -67,23 +94,28 @@ function addMultiStreamConfig (streamID, service, key, server = 'default') {
 function getMultiStreamConfigs (streamKey, isActive = true, isStreaming = false) {
   return models.MultiStream.find({
     where: { key: streamKey, isActive: isActive, isStreaming: isStreaming },
+    attributes: ['id', 'key', 'isActive'],
     include: [{
       model: models.MultiStreamConfig,
+      attributes: ['service', 'key', 'server'],
+      required: false,
       where: { isActive: isActive }
     }]
   })
-    .then(ms => {
-      if (ms === null) {
-        return Promise.reject(new Error('No valid stream exists for given stream key'))
+    .then(msInstance => {
+      if (msInstance === null) {
+        const _err = new Error('No valid stream exists for given stream key')
+        _err.status = 404
+        return Promise.reject(_err)
       }
-      const configs = ms.getMultiStreamConfigs({ plain: true })
+      const ms = msInstance.get({ plain: true })
       const output = {
         streamID: ms.id,
         streamKey: ms.key,
         destinations: []
       }
-      for (let c of configs) {
-        const serviceURL = createRTMPURL(c.service, c.key, c.server)
+      for (let c of ms.MultiStreamConfigs) {
+        const serviceURL = getRTMPURL(c.service, c.key, c.server)
         if (serviceURL === null) {
           continue
         }
@@ -96,7 +128,7 @@ function getMultiStreamConfigs (streamKey, isActive = true, isStreaming = false)
     })
     .catch(err => {
       debug(`Error retrieving stream configs for key: ${streamKey}. Reason: ${err.message}`)
-      return err
+      return Promise.reject(err)
     })
 }
 
@@ -106,21 +138,21 @@ function getMultiStreamConfigs (streamKey, isActive = true, isStreaming = false)
  * @param {string} key - Stream key provided by the service
  * @param {string} [server='default'] - Optional server name to stream to for given service
  */
-function createRTMPURL (service, key, server = 'default') {
+function getRTMPURL (service, key, server = 'default') {
   if (!services[service]) {
     return null
   }
   const s = services[service]
-  const serverURL = s.servers.get(server)
-  if (!serverURL) {
+  const serverInfo = s.servers.get(server)
+  if (!serverInfo) {
     return null
   }
-  return `${serverURL}/${key}`
+  return `${serverInfo.url}/${key}`
 }
 
 module.exports = {
   createMultiStream,
   addMultiStreamConfig,
   getMultiStreamConfigs,
-  createRTMPURL
+  getRTMPURL
 }

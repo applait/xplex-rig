@@ -4,12 +4,13 @@
  */
 
 const router = require('express').Router()
-const { sanitizeAll } = requireRelative('lib/validation')
+const { sanitizeAll } = requireRelative('lib/helper')
 
 router.get('/', (req, res) => {
   res.status(200).json({
     version: 'v1',
     methods: [
+      'GET /streams',
       'GET /agents',
       'GET /users'
     ]
@@ -19,6 +20,7 @@ router.get('/', (req, res) => {
 // Sanitize all requests
 router.use(sanitizeAll)
 
+router.use('/streams', require('./streams'))
 router.use('/agents', require('./agents'))
 router.use('/users', require('./users'))
 

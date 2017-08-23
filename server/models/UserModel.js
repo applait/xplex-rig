@@ -1,20 +1,9 @@
+/* global requireRelative */
 /**
  * Database model for User
  */
 
-const crypto = require('crypto')
-
-const generateSalt = function () {
-  return crypto.randomBytes(Math.ceil(32 / 2))
-    .toString('hex')
-    .slice(0, 32)
-}
-
-const sha512 = function (input, salt) {
-  var hash = crypto.createHmac('sha512', salt)
-  hash.update(input)
-  return hash.digest('hex')
-}
+const { generateSalt, sha512 } = requireRelative('lib/helper')
 
 module.exports = function (sequelize, DataTypes) {
   var User = sequelize.define('User', {
