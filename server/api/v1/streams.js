@@ -15,7 +15,8 @@ router.get('/', (req, res) => {
       'POST /create',
       'POST /config/new',
       'GET /config',
-      'POST /updateKey'
+      'POST /updateKey',
+      'GET /list'
     ]
   })
 })
@@ -92,6 +93,21 @@ router.post('/updateKey', requiredFields(['streamID']), jwt.verifyUser, (req, re
           streamID: req.required.streamID,
           streamKey: newkey
         }
+      })
+    })
+    .catch(next)
+})
+
+/**
+ * Get multi-streaming URL information for current user
+ */
+router.get('/list', jwt.verifyUser, (req, res, next) => {
+  multiStream.getMultiStreams(req.user.id)
+    .then(streams => {
+      res.status(200).json({
+        msg: 'MultiStreams for user',
+        status: 200,
+        payload: streams
       })
     })
     .catch(next)

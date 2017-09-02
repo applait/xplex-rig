@@ -115,6 +115,24 @@ function addMultiStreamConfig (userID, streamID, service, key, server = 'default
 }
 
 /**
+ * Get all multi-stream URLs provisioned for given user
+ *
+ * @param {string} userID - User ID to fetch multistreams for
+ * @param {boolean} [isActive=true] - If `true` return only active streams
+ */
+function getMultiStreams (userID, isActive = true) {
+  return models.MultiStream.findAll({
+    where: { UserId: userID, isActive: isActive },
+    attributes: ['id', 'key', 'isActive', 'isStreaming'],
+    raw: true
+  })
+    .catch(err => {
+      debug(`Error retrieving multi-stream URLs for user: ${userID}`)
+      return Promise.reject(err)
+    })
+}
+
+/**
  * Get current configurations for given stream key
  *
  * @param {string} streamKey - xplex multi-stream key
@@ -185,6 +203,7 @@ module.exports = {
   createMultiStream,
   updateMultiStreamKey,
   addMultiStreamConfig,
+  getMultiStreams,
   getMultiStreamConfigs,
   getRTMPURL
 }
