@@ -8,6 +8,20 @@ const { requiredFields } = requireRelative('lib/helper')
 const multiStream = requireRelative('lib/multiStream')
 const jwt = requireRelative('lib/jwt')
 
+router.get('/', (req, res) => {
+  res.status(200).json({
+    msg: 'Streams API',
+    methods: [
+      'POST /create',
+      'POST /config/new',
+      'GET /config'
+    ]
+  })
+})
+
+/**
+ * Create new multi-stream entry for given user
+ */
 router.post('/create', jwt.verifyUser, (req, res, next) => {
   multiStream.createMultiStream(req.user.id)
     .then(ms => {
@@ -24,6 +38,9 @@ router.post('/create', jwt.verifyUser, (req, res, next) => {
     .catch(next)
 })
 
+/**
+ * Retrieve multi-stream configs for given `streamKey`
+ */
 router.get('/config', requiredFields(['streamKey']), jwt.verifyUser, (req, res, next) => {
   multiStream.getMultiStreamConfigs(req.required.streamKey, true, false)
     .then(c => {
@@ -35,6 +52,9 @@ router.get('/config', requiredFields(['streamKey']), jwt.verifyUser, (req, res, 
     .catch(next)
 })
 
+/**
+ * Add a service-provider configuration entry for a given multi-stream URL
+ */
 router.post('/config/new', requiredFields(['streamID', 'service', 'key', 'server']), jwt.verifyUser, (req, res, next) => {
   multiStream.addMultiStreamConfig(
     req.user.id,
@@ -54,7 +74,5 @@ router.post('/config/new', requiredFields(['streamID', 'service', 'key', 'server
     })
     .catch(next)
 })
-
-// router.get('')
 
 module.exports = router
