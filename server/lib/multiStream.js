@@ -37,7 +37,37 @@ function createMultiStream (userID) {
     })
     .catch(err => {
       debug(`Error creating new multistream for user ${userID}`)
-      return err
+      return Promise.reject(err)
+    })
+}
+
+/**
+ * Update streaming key of given multi-stream entry
+ */
+function updateMultiStreamKey (userID, streamID) {
+  return models.MultiStream.find({
+    where: {
+      id: streamID,
+      UserId: userID
+    },
+    include: [{
+      model: models.User,
+      attributes: ['salt']
+    }]
+  })
+    .then(ms => {
+      if (ms === null) {
+        const _err = new Error('Invalid user ID or stream ID specified')
+        _err.status = 403
+        return Promise.reject(_err)
+      }
+      ms.key = sha1(`xplex://${ms.User.id}@${Date.now()}`, ms.User.salt)
+      return ms.save({ fields: ['key'] })
+        .then(() => Promise.resolve(ms.key))
+    })
+    .catch(err => {
+      debug(`Error updating streaming key for multistream ID ${streamID}`)
+      return Promise.reject(err)
     })
 }
 
@@ -153,6 +183,7 @@ function getRTMPURL (service, key, server = 'default') {
 
 module.exports = {
   createMultiStream,
+  updateMultiStreamKey,
   addMultiStreamConfig,
   getMultiStreamConfigs,
   getRTMPURL

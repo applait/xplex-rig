@@ -14,7 +14,8 @@ router.get('/', (req, res) => {
     methods: [
       'POST /create',
       'POST /config/new',
-      'GET /config'
+      'GET /config',
+      'POST /updateKey'
     ]
   })
 })
@@ -27,6 +28,7 @@ router.post('/create', jwt.verifyUser, (req, res, next) => {
     .then(ms => {
       res.status(200).json({
         msg: 'Stream created',
+        status: 200,
         payload: {
           streamID: ms.id,
           streamKey: ms.key,
@@ -46,6 +48,7 @@ router.get('/config', requiredFields(['streamKey']), jwt.verifyUser, (req, res, 
     .then(c => {
       res.status(200).json({
         msg: 'Stream config',
+        status: 200,
         payload: c
       })
     })
@@ -65,10 +68,29 @@ router.post('/config/new', requiredFields(['streamID', 'service', 'key', 'server
     .then(msconfig => {
       res.status(200).json({
         msg: 'Stream config added',
+        status: 200,
         payload: {
           streamID: req.required.streamID,
           service: req.required.service,
           server: req.required.server
+        }
+      })
+    })
+    .catch(next)
+})
+
+/**
+ * Update stream key
+ */
+router.post('/updateKey', requiredFields(['streamID']), jwt.verifyUser, (req, res, next) => {
+  multiStream.updateMultiStreamKey(req.user.id, req.required.streamID)
+    .then(newkey => {
+      res.status(200).json({
+        msg: 'Stream key updated',
+        status: 200,
+        payload: {
+          streamID: req.required.streamID,
+          streamKey: newkey
         }
       })
     })
