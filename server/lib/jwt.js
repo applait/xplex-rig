@@ -114,7 +114,67 @@ function createUserJWT (userId, secret) {
   })
 }
 
+/**
+ * Create a JWT for invites
+ *
+ * @param {string|number} userId - User ID who generates the invite
+ * @param {string} email - Email for which to generate token
+ * @param {string} secret - Secret used to sign the token
+ * @return {Promise} Promise that resolves to generated JWT
+ */
+function createInviteJWT (userId, email, secret) {
+  return new Promise(function (resolve, reject) {
+    const tokenInput = {
+      iss: userId,
+      sub: email,
+      ist: 'invite'
+    }
+    const jwtopts = {
+      algorithm: 'HS512',
+      expiresIn: '14d',
+      audience: 'rig.xplex.me'
+    }
+    jwt.sign(tokenInput, secret, jwtopts, function (err, token) {
+      if (err) {
+        debug('Error creating invite token', err.message)
+        const _err = new Error('Error generating invite token')
+        _err.status = 500
+        return reject(err)
+      }
+      resolve(token)
+    })
+  })
+}
+
+/**
+ * Verifies JWT signature for invites
+ *
+ * @param {string} email - Email to be verified
+ * @param {string} token - Token whose signature to be verified
+ * @return {Promise} Promise that resolves to generated JWT
+ */
+function verifyInvite (email, tokenInput, secret) {
+  return new Promise(function (resolve, reject) {
+    const jwtopts = {
+      algorithms: 'HS512',
+      audience: 'rig.xplex.me',
+      sub: email // Verifies if subject matches
+    }
+    jwt.verify(tokenInput, secret, jwtopts, function (err, token) {
+      if (err) {
+        debug('Error verifying invite token', err.message)
+        const _err = new Error('Error verifying invite token')
+        _err.status = 500
+        return reject(err)
+      }
+      resolve(email)
+    })
+  })
+}
+
 module.exports = {
   verifyUser,
-  createUserJWT
+  createUserJWT,
+  createInviteJWT,
+  verifyInvite
 }
