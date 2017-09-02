@@ -15,7 +15,9 @@ router.get('/', (req, res) => {
     methods: [
       'POST /',
       'POST /password',
-      'POST /auth'
+      'POST /auth',
+      'POST /invite',
+      'GET /invite/verify'
     ]
   })
 })
@@ -85,6 +87,41 @@ router.post('/auth', requiredFields(['username', 'password']), (req, res, next) 
         status: 200,
         payload: {
           token: token
+        }
+      })
+    })
+    .catch(next)
+})
+
+/**
+ * Generates invite token
+ */
+router.post('/invite', requiredFields(['userId', 'email']), (req, res, next) => {
+  jwt.createInviteJWT(req.required.userId, req.required.email, req.app.get('jwtsecret'))
+    .then(token => {
+      res.status(200).json({
+        msg: 'Invite created',
+        status: 200,
+        payload: {
+          email: req.required.email,
+          token: token
+        }
+      })
+    })
+    .catch(next)
+})
+
+/**
+ * Verifies invite token
+ */
+router.get('/invite/verify', requiredFields(['inviteToken', 'email']), (req, res, next) => {
+  jwt.verifyInvite(req.required.email, req.required.inviteToken, req.app.get('jwtsecret'))
+    .then(email => {
+      res.status(200).json({
+        msg: 'Invite verified',
+        status: 200,
+        payload: {
+          email: email
         }
       })
     })
