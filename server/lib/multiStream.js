@@ -97,7 +97,7 @@ function getMultiStreamConfigs (streamKey, isActive = true, isStreaming = false)
     attributes: ['id', 'key', 'isActive'],
     include: [{
       model: models.MultiStreamConfig,
-      attributes: ['service', 'key', 'server'],
+      attributes: ['id', 'service', 'key', 'server'],
       required: false,
       where: { isActive: isActive }
     }]
@@ -120,6 +120,7 @@ function getMultiStreamConfigs (streamKey, isActive = true, isStreaming = false)
           continue
         }
         output.destinations.push({
+          configID: c.id,
           service: c.service,
           url: serviceURL
         })
