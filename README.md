@@ -5,22 +5,30 @@ Internal API server for xplex.
 
 [![CircleCI](https://circleci.com/gh/applait/xplex-rig/tree/master.svg?style=svg&circle-token=e8251cf207d23cb87a38799f6e70f165bc5a1ad7)](https://circleci.com/gh/applait/xplex-rig/tree/master)
 
-## Pre-requisites
-
-- NodeJS 8.2+
-- PostgreSQL 9.6+ (get it running)
-- Etcd store
-
 ## Install
 
-- Copy `config.sample.js` to `config.js` and edit values, with DB credentials.
-- Install application dependencies: `npm install`
-- Start server: `npm start`
-- Start agent: `npm run agent`
+- [Install Golang 1.9+](https://golang.org/doc/install)
+- Install [Glide](https://github.com/Masterminds/glide)
 
-## Tests
+In project root, run:
 
-- Run: `npm test`
+```sh
+$ glide install
+```
+
+Compile debug builds using `build.sh`:
+
+```sh
+$ ./build.sh dev
+```
+
+Compile static binaries for release profile:
+
+```sh
+$ ./build.sh release
+```
+
+Compiled binaries are put in `./bin/`.
 
 ## Specifications
 

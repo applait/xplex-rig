@@ -1,9 +1,0 @@
-{
-    "extends": "standard",
-    "env": {
-      "node": true
-    },
-    "rules": {
-      "camelcase": ["error", { "properties": "never" }]
-    }
-}
