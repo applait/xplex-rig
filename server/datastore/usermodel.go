@@ -12,8 +12,8 @@ type User struct {
 	PGModel
 	Username string `sql:",unique,notnull"`
 	Email    string `sql:",unique,notnull"`
-	Password string
-	IsActive bool `sql:",notnull,default:false"`
+	Password string `sql:",notnull"`
+	IsActive bool   `sql:",notnull,default:false"`
 }
 
 // Insert current user in DB
