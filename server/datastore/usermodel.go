@@ -16,13 +16,6 @@ type User struct {
 	IsActive bool `sql:",notnull,default:false"`
 }
 
-// NewUser creates a new User and initializes PGModel
-func NewUser() User {
-	return User{
-		PGModel: PGModel{},
-	}
-}
-
 // Insert current user in DB
 func (u *User) Insert(db *pg.DB) error {
 	u.CreatedAt = time.Now()
