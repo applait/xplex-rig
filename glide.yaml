@@ -1,4 +1,4 @@
-package: applait/xplex-rig
+package: github.com/applait/xplex-rig
 import:
 - package: github.com/gorilla/mux
   version: ^1.4.0
