@@ -1,10 +1,10 @@
 package main
 
 import (
-	ds "applait/xplex-rig/server/datastore"
 	"log"
 	"net/http"
 
+	"github.com/applait/xplex-rig/server/datastore"
 	"github.com/gorilla/mux"
 )
 
@@ -15,9 +15,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	connuri := "postgres://xplex:1234@localhost/xplex_rig_dev?sslmode=disable"
-	_, err := ds.ConnectPG(connuri)
+	db, err := datastore.ConnectPG(connuri)
 	if err != nil {
 		log.Fatalf("Error connecting to DB. Reason: %s", err)
+	}
+	err = datastore.CreateSchema(db)
+	if err != nil {
+		log.Fatalf("Error creating Postgres schema. Reason: %s", err)
 	}
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler)
