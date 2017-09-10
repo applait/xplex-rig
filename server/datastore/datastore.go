@@ -33,6 +33,8 @@ func CreateSchema(db *pg.DB) error {
 		&User{},
 		&RTMPStream{},
 		&RTMPPush{},
+		&EdgeCluster{},
+		&AgentNode{},
 	}
 	for _, model := range models {
 		err := db.CreateTable(model, &orm.CreateTableOptions{
