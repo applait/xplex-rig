@@ -9,11 +9,15 @@ import (
 
 // User is used to store user information
 type User struct {
-	PGModel
-	Username string `sql:",unique,notnull"`
-	Email    string `sql:",unique,notnull"`
-	Password string `sql:",notnull"`
-	IsActive bool   `sql:",notnull,default:false"`
+	ID        int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Username  string `sql:",unique,notnull"`
+	Email     string `sql:",unique,notnull"`
+	Password  string `sql:",notnull"`
+	IsActive  bool   `sql:",notnull,default:false"`
+
+	RTMPStreams []*RTMPStream // User hasMany RTMPStream
 }
 
 // Insert current user in DB

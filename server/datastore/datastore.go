@@ -5,20 +5,8 @@ import (
 	"time"
 
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 )
-
-// DataStore defines a basic common interface common to all data store operations
-type DataStore interface {
-	Insert(*pg.DB) error
-	Update(*pg.DB) error
-}
-
-// PGModel provides common fields and data for postgres models to add useful methods
-type PGModel struct {
-	ID        int
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
 
 // ConnectPG connects to a Postgres database given a connection URI and returns
 // the DB interface with logging set up
@@ -37,4 +25,23 @@ func ConnectPG(dburi string) (*pg.DB, error) {
 		log.Printf("%s %s", time.Since(event.StartTime), query)
 	})
 	return db, nil
+}
+
+// CreateSchema creates tables in Postgres from models
+func CreateSchema(db *pg.DB) error {
+	models := []interface{}{
+		&User{},
+		&RTMPStream{},
+		&RTMPPush{},
+	}
+	for _, model := range models {
+		err := db.CreateTable(model, &orm.CreateTableOptions{
+			IfNotExists:   true,
+			FKConstraints: true,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
