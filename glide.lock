@@ -1,10 +1,10 @@
 hash: 536f0ba610974c718b3831225b585686c84fb515ffaaf68aa01bdb5587d91bb8
-updated: 2017-09-10T03:23:28.350918702+05:30
+updated: 2017-09-11T21:03:23.876231417+05:30
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/go-pg/pg
-  version: a799605e0c66c977511cc1383a1b0003c3da0d68
+  version: 43bc4a3a83864abe5cbf4cc1180188eaf68a3cf5
   subpackages:
   - internal
   - internal/parser
@@ -18,7 +18,7 @@ imports:
 - name: github.com/jinzhu/inflection
   version: 1c35d901db3da928c72a72d8458480cc9ade058f
 - name: golang.org/x/crypto
-  version: 9ba3862cf6a5452ae579de98f9364dd2e544844c
+  version: 74b34b9dd60829a9fcaf56a59e81c3877a8ecd2c
   subpackages:
   - bcrypt
   - blowfish

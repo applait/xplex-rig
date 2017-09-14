@@ -21,7 +21,7 @@ type RTMPPush struct {
 	ID       int
 	Service  string `sql:",notnull"`
 	Key      string `sql:",notnull"`
-	Server   string `sql:",notnull,type:text default 'default'"`
+	Server   string `sql:",notnull,default:'default'"`
 	IsActive bool   `sql:",notnull,default:false"`
 
 	RTMPStreamID int // RTMPPush belongsTo RTMPStream
