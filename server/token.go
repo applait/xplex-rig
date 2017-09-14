@@ -6,15 +6,15 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-// RigClaims defines a common structure used for JWT claims in rig
-type RigClaims struct {
+// TokenClaims defines a common structure used for JWT claims in rig
+type TokenClaims struct {
 	IssuerType string `json:"ist,omitempty"`
 	jwt.StandardClaims
 }
 
 // NewUserToken generates a JWT for users and signs with given secret
 func NewUserToken(userid int, secret string) (string, error) {
-	claims := RigClaims{
+	claims := TokenClaims{
 		"user",
 		jwt.StandardClaims{
 			Issuer:    string(userid),
@@ -28,7 +28,7 @@ func NewUserToken(userid int, secret string) (string, error) {
 
 // NewInviteToken generates a JWT for user invites
 func NewInviteToken(senderid int, email string, secret string) (string, error) {
-	claims := RigClaims{
+	claims := TokenClaims{
 		"invite",
 		jwt.StandardClaims{
 			Issuer:    string(senderid),
@@ -42,11 +42,11 @@ func NewInviteToken(senderid int, email string, secret string) (string, error) {
 }
 
 // ParseToken attempts to verify a signed JWT issued for user auth
-func ParseToken(t string, secret string) (*RigClaims, error) {
-	parsed, err := jwt.ParseWithClaims(t, &RigClaims{}, func(ti *jwt.Token) (interface{}, error) {
+func ParseToken(t string, secret string) (*TokenClaims, error) {
+	parsed, err := jwt.ParseWithClaims(t, &TokenClaims{}, func(ti *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
-	if claims, ok := parsed.Claims.(*RigClaims); ok && parsed.Valid {
+	if claims, ok := parsed.Claims.(*TokenClaims); ok && parsed.Valid {
 		return claims, nil
 	}
 	return nil, err
