@@ -24,5 +24,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error connecting to database. Reason: %s", err)
 	}
-	http.ListenAndServe(fmt.Sprintf(":%d", conf.Server.Port), rest.Start(db, &conf))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.Server.Port), rest.Start(db, &conf)))
 }
