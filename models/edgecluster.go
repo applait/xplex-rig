@@ -1,4 +1,4 @@
-package datastore
+package models
 
 // EdgeCluster stores DNS and location information for edge clusters
 type EdgeCluster struct {
