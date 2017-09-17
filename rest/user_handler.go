@@ -26,6 +26,10 @@ func UserHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
 
 	// Route for authenticating user using username and password
 	r.Handle("/auth", newChain(required("username", "password")).use(userAuth(db, conf))).Methods("POST")
+
+	// Route for generating new user invite
+	r.Handle("/invite", newChain(required("senderId", "email"), auth(conf.Server.JWTSecret, "user")).
+		use(userInvite(db, conf))).Methods("POST")
 }
 
 // userCreate handles new user creation
@@ -136,5 +140,30 @@ func userAuth(db *pg.DB, conf *config.Config) http.HandlerFunc {
 		success(w, "Authentication successful", http.StatusOK, map[string]string{
 			"token": t,
 		})
+	}
+}
+
+// userInvite handles generating invite codes
+func userInvite(db *pg.DB, conf *config.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := db.Model(&models.User{}).Column("id").Where("email = ?", r.FormValue("email")).First()
+		if err == pg.ErrNoRows {
+			t, err := token.NewInviteToken(r.FormValue("senderId"), r.FormValue("email"), conf.Server.JWTSecret)
+			if err != nil {
+				log.Printf("Error creating invite token. senderId: %s, email: %s. Reason: %s",
+					r.FormValue("senderId"), r.FormValue("email"), err)
+				errorRes(w, "Unable to create invite", http.StatusInternalServerError)
+			}
+			success(w, "Invite created", http.StatusOK, map[string]string{
+				"email": r.FormValue("email"),
+				"token": t,
+			})
+			return
+		}
+		if err == nil {
+			errorRes(w, "Email is already registered.", http.StatusPreconditionFailed)
+			return
+		}
+		errorRes(w, "Unable to create invite.", http.StatusInternalServerError)
 	}
 }

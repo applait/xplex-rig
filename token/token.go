@@ -31,11 +31,11 @@ func NewUserToken(u *models.User, secret string) (string, error) {
 }
 
 // NewInviteToken generates a JWT for user invites
-func NewInviteToken(senderid int, email string, secret string) (string, error) {
+func NewInviteToken(senderid string, email string, secret string) (string, error) {
 	claims := Claims{
 		"invite",
 		jwt.StandardClaims{
-			Issuer:    string(senderid),
+			Issuer:    senderid,
 			Subject:   email,
 			Audience:  "rig.xplex.me",
 			ExpiresAt: time.Now().AddDate(0, 0, 14).Unix(),
