@@ -23,6 +23,9 @@ func UserHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
 	// Route for updating password
 	r.Handle("/password", newChain(required("password"), auth(conf.Server.JWTSecret, "user")).
 		use(userPassword(db))).Methods("POST")
+
+	// Route for authenticating user using username and password
+	r.Handle("/auth", newChain(required("username", "password")).use(userAuth(db, conf))).Methods("POST")
 }
 
 // userCreate handles new user creation
@@ -105,6 +108,33 @@ func userPassword(db *pg.DB) http.HandlerFunc {
 		}
 		success(w, "User password changed", http.StatusOK, map[string]string{
 			"userName": claims.Subject,
+		})
+	}
+}
+
+// userAuth handles authentication of users using username and password
+func userAuth(db *pg.DB, conf *config.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		u := models.User{
+			Username: r.FormValue("username"),
+		}
+		if err := db.Model(&u).Select(); err != nil {
+			log.Printf("Error retrieving user information. Reason: %s", err)
+			errorRes(w, "Error fetching user information", http.StatusInternalServerError)
+			return
+		}
+		if u.MatchPassword(r.FormValue("password")) == false {
+			errorRes(w, "Invalid credentials", http.StatusUnauthorized)
+			return
+		}
+		t, err := token.NewUserToken(&u, conf.Server.JWTSecret)
+		if err != nil {
+			log.Printf("Error creating auth token for user ID %d. Reason: %s\n", u.ID, err)
+			errorRes(w, "Unable to create auth token", http.StatusInternalServerError)
+			return
+		}
+		success(w, "Authentication successful", http.StatusOK, map[string]string{
+			"token": t,
 		})
 	}
 }
