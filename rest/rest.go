@@ -27,6 +27,25 @@ func (r Res) Send(w http.ResponseWriter) (int, error) {
 	return w.Write(m)
 }
 
+// errorRes is a shorthand for sending error response
+func errorRes(w http.ResponseWriter, msg string, status int) (int, error) {
+	res := Res{
+		Msg:    msg,
+		Status: status,
+	}
+	return res.Send(w)
+}
+
+// success is a shorthand for sending success response
+func success(w http.ResponseWriter, msg string, status int, payload interface{}) (int, error) {
+	res := Res{
+		Msg:     msg,
+		Status:  status,
+		Payload: payload,
+	}
+	return res.Send(w)
+}
+
 // middleware takes in a http.Handler and calls its ServeHTTP method only if it
 // can move to the next level
 type middleware func(http.Handler) http.Handler
@@ -86,14 +105,9 @@ func Start(db *pg.DB, config *config.Config) *mux.Router {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	o := Res{
-		Msg:    "xplex-rig HTTP API v1",
-		Status: 200,
-		Payload: []string{
-			"GET /",
-			"GET /users",
-			"GET /streams",
-		},
-	}
-	o.Send(w)
+	success(w, "xplex-rig HTTP API v1", http.StatusOK, []string{
+		"GET /",
+		"GET /users",
+		"GET /streams",
+	})
 }
