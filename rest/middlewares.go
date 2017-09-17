@@ -3,8 +3,20 @@
 package rest
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"strings"
+
+	"github.com/applait/xplex-rig/token"
+)
+
+// Private key type to prevent context key collisions
+type key int
+
+// Context key definitions
+const (
+	ctxClaims key = iota + 1
 )
 
 // required returns a middleware that requires some fields to be present
@@ -23,6 +35,27 @@ func required(fields ...string) middleware {
 				}
 			}
 			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+// auth is a middleware that ensures valid user JWT is present in Authorization
+// Bearer token and verfies token signing using given secret and `ist`
+func auth(secret string, ist string) middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			a := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
+			if len(a) != 2 || a[0] != "Bearer" {
+				errorRes(w, "Invalid Authorization header. Authorization header needs Bearer token.", http.StatusUnauthorized)
+				return
+			}
+			claims, err := token.ParseToken(a[1], secret)
+			if err != nil || claims.IssuerType != ist {
+				errorRes(w, "Invalid authorization token.", http.StatusUnauthorized)
+				return
+			}
+			ctx := context.WithValue(r.Context(), ctxClaims, claims)
+			h.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
