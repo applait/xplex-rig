@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/applait/xplex-rig/server/config"
-	"github.com/applait/xplex-rig/server/datastore"
-	"github.com/applait/xplex-rig/server/rest"
+	"github.com/applait/xplex-rig/config"
+	"github.com/applait/xplex-rig/datastore"
+	"github.com/applait/xplex-rig/rest"
 )
 
 // HomeHandler handles home URL route

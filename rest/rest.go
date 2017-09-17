@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/applait/xplex-rig/server/config"
+	"github.com/applait/xplex-rig/config"
 	"github.com/go-pg/pg"
 	"github.com/gorilla/mux"
 )

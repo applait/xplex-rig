@@ -13,3 +13,6 @@
 
 # Ignore /config.json
 /config.json
+
+# Ignore compiled xplex-rig binary in root
+/xplex-rig

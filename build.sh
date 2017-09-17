@@ -9,12 +9,12 @@ function cleanRebuild {
 
 function buildServerRelease {
     echo "Building xplex-rig server release"
-    CGO_ENABLED=0 GOOS=linux go build -o bin/rig-server -a -ldflags '-extldflags "-static"' ./server/
+    CGO_ENABLED=0 GOOS=linux go build -o bin/xplex-rig -a -ldflags '-extldflags "-static"' .
 }
 
 function buildServerDev {
     echo "Building xplex-rig server dev"
-    go build -o bin/rig-server ./server/
+    go build -o bin/xplex-rig .
 }
 
 function buildDev {
