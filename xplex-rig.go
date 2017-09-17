@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/applait/xplex-rig/config"
-	"github.com/applait/xplex-rig/datastore"
+	"github.com/applait/xplex-rig/models"
 	"github.com/applait/xplex-rig/rest"
 )
 
@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading config. Reason: %s", err)
 	}
-	db, err := datastore.ConnectPG(conf.Server.PostgresURL)
+	db, err := models.ConnectPG(conf.Server.PostgresURL)
 	if err != nil {
 		log.Fatalf("Error connecting to database. Reason: %s", err)
 	}
