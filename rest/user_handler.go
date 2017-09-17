@@ -3,6 +3,7 @@ package rest
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/applait/xplex-rig/config"
 	"github.com/applait/xplex-rig/models"
@@ -18,6 +19,10 @@ func UserHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
 
 	// Route for `GET /users/`
 	r.HandleFunc("/", userHome).Methods("GET")
+
+	// Route for updating password
+	r.Handle("/password", newChain(required("password"), auth(conf.Server.JWTSecret, "user")).
+		use(userPassword(db))).Methods("POST")
 }
 
 // userCreate handles new user creation
@@ -48,7 +53,7 @@ func userCreate(db *pg.DB, conf *config.Config) http.HandlerFunc {
 			"email":    r.FormValue("email"),
 			"token":    "",
 		}
-		if t, err = token.NewUserToken(u.ID, conf.Server.JWTSecret); err != nil {
+		if t, err = token.NewUserToken(&u, conf.Server.JWTSecret); err != nil {
 			msg = "User created, but could not generate token"
 			log.Printf("Error creating token for new user ID %d. Reason: %s\n", u.ID, err)
 		} else {
@@ -72,4 +77,34 @@ func userHome(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	res.Send(w)
+}
+
+// userPassword updates a given password for current user in the database.
+// Current user is selected from the iss field of JWT used for Authorization
+func userPassword(db *pg.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		claims := r.Context().Value(ctxClaims).(*token.Claims)
+		userID, err := strconv.Atoi(claims.Issuer)
+		if err != nil {
+			log.Printf("Error converting user claim issuer. Reason: %s", err)
+			errorRes(w, "Invalid authorization token", http.StatusUnauthorized)
+			return
+		}
+		u := models.User{
+			ID:       userID,
+			Username: claims.Subject,
+		}
+		if err = db.Model(&u).Select(); err != nil {
+			errorRes(w, "Error updating user password.", http.StatusInternalServerError)
+			return
+		}
+		if err = u.UpdatePassword(db, r.FormValue("password")); err != nil {
+			log.Printf("Error hashing and setting new user password. Reason: %s", err)
+			errorRes(w, "Error updating user password.", http.StatusInternalServerError)
+			return
+		}
+		success(w, "User password changed", http.StatusOK, map[string]string{
+			"userName": claims.Subject,
+		})
+	}
 }
