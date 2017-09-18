@@ -51,7 +51,7 @@ func ParseToken(t string, secret string) (*Claims, error) {
 	parsed, err := jwt.ParseWithClaims(t, &Claims{}, func(ti *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
-	if claims, ok := parsed.Claims.(*Claims); ok && parsed.Valid {
+	if claims, ok := parsed.Claims.(*Claims); ok && parsed.Valid && claims.VerifyAudience("rig.xplex.me", true) {
 		return claims, nil
 	}
 	return nil, err
