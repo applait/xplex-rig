@@ -11,12 +11,12 @@ import (
 	"github.com/applait/xplex-rig/token"
 )
 
-// Private key type to prevent context key collisions
-type key int
+// ctxKey is a private key type to share context values in requests
+type ctxKey int
 
 // Context key definitions
 const (
-	ctxClaims key = iota + 1
+	ctxClaims ctxKey = iota + 1
 )
 
 // required returns a middleware that requires some fields to be present
