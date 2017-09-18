@@ -29,6 +29,9 @@ func UserHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
 	rpost.Handle("/invite", newChain(required("email"), auth(conf.Server.JWTSecret, "user")).
 		use(userInvite(db, conf)))
 
+	// Route for generating new user invite
+	rpost.Handle("/invite/verify", newChain(required("inviteToken", "email")).use(userInviteVerify(db, conf)))
+
 	// Route for creating new user
 	rpost.Handle("/", newChain(required("username", "password", "email")).use(userCreate(db, conf)))
 }
@@ -169,5 +172,19 @@ func userInvite(db *pg.DB, conf *config.Config) http.HandlerFunc {
 			return
 		}
 		errorRes(w, "Unable to create invite.", http.StatusInternalServerError)
+	}
+}
+
+// userInviteVerify validates invite token
+func userInviteVerify(db *pg.DB, conf *config.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		t, err := token.ParseToken(r.FormValue("inviteToken"), conf.Server.JWTSecret)
+		if err != nil || t.IssuerType != "invite" || t.Subject != r.FormValue("email") {
+			errorRes(w, "Error verifying invite token", http.StatusNotAcceptable)
+			return
+		}
+		success(w, "Invite verified.", http.StatusOK, map[string]string{
+			"email": t.Subject,
+		})
 	}
 }
