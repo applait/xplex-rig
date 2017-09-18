@@ -20,6 +20,22 @@ type User struct {
 	RTMPStreams []*RTMPStream // User hasMany RTMPStream
 }
 
+// Find is a utility function to load user from DB based on values set in
+// `User`. It returns `pg.ErrNoRows` if no user is found
+func (u *User) Find(db *pg.DB) error {
+	q := db.Model(u)
+	if u.ID != 0 {
+		q.Where("id = ?", u.ID)
+	}
+	if u.Username != "" {
+		q.Where("username = ?", u.Username)
+	}
+	if u.Email != "" {
+		q.Where("email = ?", u.Email)
+	}
+	return q.First()
+}
+
 // Insert current user in DB
 func (u *User) Insert(db *pg.DB) error {
 	u.CreatedAt = time.Now()
