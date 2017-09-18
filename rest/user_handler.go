@@ -14,22 +14,23 @@ import (
 
 // UserHandler providers handler for `/users` HTTP API
 func UserHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
-	// Route for creating new user
-	r.Handle("/", newChain(required("username", "password", "email")).use(userCreate(db, conf))).Methods("POST")
-
 	// Route for `GET /users/`
 	r.HandleFunc("/", userHome).Methods("GET")
 
+	rpost := r.Methods("POST").Subrouter()
 	// Route for updating password
-	r.Handle("/password", newChain(required("password"), auth(conf.Server.JWTSecret, "user")).
-		use(userPassword(db))).Methods("POST")
+	rpost.Handle("/password", newChain(required("password"), auth(conf.Server.JWTSecret, "user")).
+		use(userPassword(db)))
 
 	// Route for authenticating user using username and password
-	r.Handle("/auth", newChain(required("username", "password")).use(userAuth(db, conf))).Methods("POST")
+	rpost.Handle("/auth", newChain(required("username", "password")).use(userAuth(db, conf)))
 
 	// Route for generating new user invite
-	r.Handle("/invite", newChain(required("senderId", "email"), auth(conf.Server.JWTSecret, "user")).
-		use(userInvite(db, conf))).Methods("POST")
+	rpost.Handle("/invite", newChain(required("email"), auth(conf.Server.JWTSecret, "user")).
+		use(userInvite(db, conf)))
+
+	// Route for creating new user
+	rpost.Handle("/", newChain(required("username", "password", "email")).use(userCreate(db, conf)))
 }
 
 // userCreate handles new user creation
@@ -101,7 +102,7 @@ func userPassword(db *pg.DB) http.HandlerFunc {
 			ID:       userID,
 			Username: claims.Subject,
 		}
-		if err = db.Model(&u).Select(); err != nil {
+		if err = u.Find(db); err != nil {
 			errorRes(w, "Error updating user password.", http.StatusInternalServerError)
 			return
 		}
@@ -122,12 +123,13 @@ func userAuth(db *pg.DB, conf *config.Config) http.HandlerFunc {
 		u := models.User{
 			Username: r.FormValue("username"),
 		}
-		if err := db.Model(&u).Select(); err != nil {
+		err := u.Find(db)
+		if err != nil && err != pg.ErrNoRows {
 			log.Printf("Error retrieving user information. Reason: %s", err)
 			errorRes(w, "Error fetching user information", http.StatusInternalServerError)
 			return
 		}
-		if u.MatchPassword(r.FormValue("password")) == false {
+		if err == pg.ErrNoRows || u.MatchPassword(r.FormValue("password")) == false {
 			errorRes(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
@@ -146,9 +148,11 @@ func userAuth(db *pg.DB, conf *config.Config) http.HandlerFunc {
 // userInvite handles generating invite codes
 func userInvite(db *pg.DB, conf *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := db.Model(&models.User{}).Column("id").Where("email = ?", r.FormValue("email")).First()
+		u := models.User{Email: r.FormValue("email")}
+		claims := r.Context().Value(ctxClaims).(*token.Claims)
+		err := u.Find(db)
 		if err == pg.ErrNoRows {
-			t, err := token.NewInviteToken(r.FormValue("senderId"), r.FormValue("email"), conf.Server.JWTSecret)
+			t, err := token.NewInviteToken(claims.Issuer, r.FormValue("email"), conf.Server.JWTSecret)
 			if err != nil {
 				log.Printf("Error creating invite token. senderId: %s, email: %s. Reason: %s",
 					r.FormValue("senderId"), r.FormValue("email"), err)
