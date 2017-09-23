@@ -31,8 +31,8 @@ func ConnectPG(dburi string) (*pg.DB, error) {
 func CreateSchema(db *pg.DB) error {
 	models := []interface{}{
 		&User{},
-		&RTMPStream{},
-		&RTMPPush{},
+		&MultiStream{},
+		&MultiStreamConfig{},
 		&EdgeCluster{},
 		&AgentNode{},
 	}

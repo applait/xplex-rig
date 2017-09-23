@@ -17,7 +17,7 @@ type User struct {
 	Password  string `sql:",notnull"`
 	IsActive  bool   `sql:",notnull,default:false"`
 
-	RTMPStreams []*RTMPStream // User hasMany RTMPStream
+	MultiStreams []*MultiStream // User hasMany MultiStream
 }
 
 // Find is a utility function to load user from DB based on values set in
