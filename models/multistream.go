@@ -2,8 +2,8 @@ package models
 
 import "time"
 
-// RTMPStream stores information of multi-streaming keys for users
-type RTMPStream struct {
+// MultiStream stores information of multi-streaming keys for users
+type MultiStream struct {
 	ID          int
 	Key         string `sql:",unique,notnull"`
 	IsActive    bool   `sql:",notnull,default:false"`
@@ -11,18 +11,18 @@ type RTMPStream struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 
-	UserID     int         // RTMPStream belongsTo User
-	RTMPPushes []*RTMPPush // RTMPStream hasMany RTMPPush
+	UserID             int                  // MultiStream belongsTo User
+	MultiStreamConfigs []*MultiStreamConfig // MultiStream hasMany MultiStreamConfigs
 }
 
-// RTMPPush store configuration information of RTMP ingestion services
+// MultiStreamConfig stores configuration information of RTMP ingestion services
 // to push to
-type RTMPPush struct {
+type MultiStreamConfig struct {
 	ID       int
 	Service  string `sql:",notnull"`
 	Key      string `sql:",notnull"`
 	Server   string `sql:",notnull,default:'default'"`
 	IsActive bool   `sql:",notnull,default:false"`
 
-	RTMPStreamID int // RTMPPush belongsTo RTMPStream
+	MultiStreamID int // MultiStreamConfig belongsTo MultiStream
 }
