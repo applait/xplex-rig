@@ -37,29 +37,43 @@ func (u *User) Find(db *pg.DB) error {
 }
 
 // Insert current user in DB
-func (u *User) Insert(db *pg.DB) error {
+func (u *User) Insert(db *pg.DB) (bool, error) {
 	u.CreatedAt = time.Now()
 	u.UpdatedAt = time.Now()
-	return db.Insert(u)
+	res, err := db.Model(u).OnConflict("DO NOTHING").Insert()
+	if err != nil {
+		return false, err
+	}
+	if res.RowsAffected() == 1 {
+		return true, nil
+	}
+	return false, nil
 }
 
 // Update current user in DB
-func (u *User) Update(db *pg.DB) error {
+func (u *User) Update(db *pg.DB) (bool, error) {
 	u.UpdatedAt = time.Now()
-	return db.Update(u)
+	res, err := db.Model(&u).Update()
+	if err != nil {
+		return false, err
+	}
+	if res.RowsAffected() == 1 {
+		return true, nil
+	}
+	return false, nil
 }
 
 // UpdatePassword updates user's password
-func (u *User) UpdatePassword(db *pg.DB, newPassword string) error {
+func (u *User) UpdatePassword(db *pg.DB, newPassword string) (bool, error) {
 	err := u.SetPassword(newPassword)
 	if err != nil {
-		return err
+		return false, err
 	}
 	return u.Update(db)
 }
 
 // UpdateEmail updates user's email
-func (u *User) UpdateEmail(db *pg.DB, email string) error {
+func (u *User) UpdateEmail(db *pg.DB, email string) (bool, error) {
 	u.Email = email
 	return u.Update(db)
 }

@@ -48,15 +48,20 @@ func userCreate(db *pg.DB, conf *config.Config) http.HandlerFunc {
 			errorRes(w, "Error creating user", http.StatusInternalServerError)
 			return
 		}
-		if err := u.Insert(db); err != nil {
+		ok, err := u.Insert(db)
+		if err != nil {
 			log.Printf("Error saving new user to DB. Reason: %s\n", err)
 			errorRes(w, "Error creating user", http.StatusInternalServerError)
+			return
+		}
+		if !ok && err == nil {
+			log.Printf("Attempting sign up of previous existing user. Username: %s, Email: %s\n", u.Username, u.Email)
+			errorRes(w, "User exists for specified username or email", http.StatusBadRequest)
 			return
 		}
 		log.Printf("User created. ID: %d, Username: %s\n", u.ID, u.Username)
 
 		var t string
-		var err error
 
 		msg := "User created"
 		payload := map[string]string{
@@ -64,7 +69,7 @@ func userCreate(db *pg.DB, conf *config.Config) http.HandlerFunc {
 			"email":    r.FormValue("email"),
 			"token":    "",
 		}
-		if t, err = token.NewUserToken(&u, conf.Server.JWTSecret); err != nil {
+		if t, err = token.NewUserToken(u.ID, u.Username, conf.Server.JWTSecret); err != nil {
 			msg = "User created, but could not generate token"
 			log.Printf("Error creating token for new user ID %d. Reason: %s\n", u.ID, err)
 		} else {
@@ -106,12 +111,11 @@ func userPassword(db *pg.DB) http.HandlerFunc {
 			Username: claims.Subject,
 		}
 		if err = u.Find(db); err != nil {
-			errorRes(w, "Error updating user password.", http.StatusInternalServerError)
+			errorRes(w, "Cannot update user password", http.StatusBadRequest)
 			return
 		}
-		if err = u.UpdatePassword(db, r.FormValue("password")); err != nil {
-			log.Printf("Error hashing and setting new user password. Reason: %s", err)
-			errorRes(w, "Error updating user password.", http.StatusInternalServerError)
+		if ok, _ := u.UpdatePassword(db, r.FormValue("password")); !ok {
+			errorRes(w, "Cannot update user password", http.StatusBadRequest)
 			return
 		}
 		success(w, "User password changed", http.StatusOK, map[string]string{
@@ -136,7 +140,7 @@ func userAuth(db *pg.DB, conf *config.Config) http.HandlerFunc {
 			errorRes(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		t, err := token.NewUserToken(&u, conf.Server.JWTSecret)
+		t, err := token.NewUserToken(u.ID, u.Username, conf.Server.JWTSecret)
 		if err != nil {
 			log.Printf("Error creating auth token for user ID %d. Reason: %s\n", u.ID, err)
 			errorRes(w, "Unable to create auth token", http.StatusInternalServerError)
