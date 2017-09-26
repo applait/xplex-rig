@@ -97,10 +97,11 @@ func (c chain) use(f http.HandlerFunc) http.Handler {
 }
 
 // Start bootstraps the REST API
-func Start(db *pg.DB, config *config.Config) *mux.Router {
+func Start(db *pg.DB, conf *config.Config) *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
 	r.HandleFunc("/", homeHandler).Methods("GET")
-	UserHandler(r.PathPrefix("/users").Subrouter(), db, config)
+	UserHandler(r.PathPrefix("/users").Subrouter(), db, conf)
+	StreamHandler(r.PathPrefix("/streams").Subrouter(), db, conf)
 	return r
 }
 
