@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/applait/xplex-rig/models"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -15,12 +14,12 @@ type Claims struct {
 }
 
 // NewUserToken generates a JWT for users and signs with given secret
-func NewUserToken(u *models.User, secret string) (string, error) {
+func NewUserToken(userid int, username string, secret string) (string, error) {
 	claims := Claims{
 		"user",
 		jwt.StandardClaims{
-			Issuer:    fmt.Sprintf("%d", u.ID),
-			Subject:   u.Username,
+			Issuer:    fmt.Sprintf("%d", userid),
+			Subject:   username,
 			Audience:  "rig.xplex.me",
 			ExpiresAt: time.Now().AddDate(0, 0, 28).Unix(),
 			IssuedAt:  time.Now().Unix(),
