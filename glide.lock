@@ -1,10 +1,10 @@
-hash: 536f0ba610974c718b3831225b585686c84fb515ffaaf68aa01bdb5587d91bb8
-updated: 2017-09-11T21:03:23.876231417+05:30
+hash: af0ec1691d6b7877d19f88745c25a6fb788e1dc29d3f5bedade0572eb246d137
+updated: 2017-09-28T01:01:00.188545315+05:30
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/go-pg/pg
-  version: 43bc4a3a83864abe5cbf4cc1180188eaf68a3cf5
+  version: 0cd2ff625d4d38126c5b6afb9399a3a436883bd1
   subpackages:
   - internal
   - internal/parser
@@ -14,11 +14,13 @@ imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: bcd8bc72b08df0f70df986b97f95590779502d31
+  version: 24fca303ac6da784b9e8269f724ddeb0b2eea5e7
 - name: github.com/jinzhu/inflection
   version: 1c35d901db3da928c72a72d8458480cc9ade058f
+- name: github.com/satori/go.uuid
+  version: 5bf94b69c6b68ee1b541973bb8e1144db23a194b
 - name: golang.org/x/crypto
-  version: 74b34b9dd60829a9fcaf56a59e81c3877a8ecd2c
+  version: 847319b7fc94cab682988f93da778204da164588
   subpackages:
   - bcrypt
   - blowfish
