@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/go-pg/pg"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// User is used to store user information
-type User struct {
-	ID        int
+// UserAccount is used to store user information
+type UserAccount struct {
+	ID        uuid.UUID `sql:",pk,type:uuid"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Username  string `sql:",unique,notnull"`
@@ -17,27 +18,28 @@ type User struct {
 	Password  string `sql:",notnull"`
 	IsActive  bool   `sql:",notnull,default:false"`
 
-	MultiStreams []*MultiStream // User hasMany MultiStream
+	MultiStreams []*MultiStream // UserAccount hasMany MultiStream
 }
 
 // Find is a utility function to load user from DB based on values set in
 // `User`. It returns `pg.ErrNoRows` if no user is found
-func (u *User) Find(db *pg.DB) error {
+func (u *UserAccount) Find(db *pg.DB) error {
 	q := db.Model(u)
-	if u.ID != 0 {
-		q.Where("id = ?", u.ID)
+	if u.ID != uuid.Nil {
+		q.Where("user_account.id = ?", u.ID)
 	}
 	if u.Username != "" {
-		q.Where("username = ?", u.Username)
+		q.Where("user_account.username = ?", u.Username)
 	}
 	if u.Email != "" {
-		q.Where("email = ?", u.Email)
+		q.Where("user_account.email = ?", u.Email)
 	}
 	return q.First()
 }
 
 // Insert current user in DB
-func (u *User) Insert(db *pg.DB) (bool, error) {
+func (u *UserAccount) Insert(db *pg.DB) (bool, error) {
+	u.ID = uuid.NewV4()
 	u.CreatedAt = time.Now()
 	u.UpdatedAt = time.Now()
 	res, err := db.Model(u).OnConflict("DO NOTHING").Insert()
@@ -51,9 +53,9 @@ func (u *User) Insert(db *pg.DB) (bool, error) {
 }
 
 // Update current user in DB
-func (u *User) Update(db *pg.DB) (bool, error) {
+func (u *UserAccount) Update(db *pg.DB) (bool, error) {
 	u.UpdatedAt = time.Now()
-	res, err := db.Model(&u).Update()
+	res, err := db.Model(u).Update()
 	if err != nil {
 		return false, err
 	}
@@ -64,7 +66,7 @@ func (u *User) Update(db *pg.DB) (bool, error) {
 }
 
 // UpdatePassword updates user's password
-func (u *User) UpdatePassword(db *pg.DB, newPassword string) (bool, error) {
+func (u *UserAccount) UpdatePassword(db *pg.DB, newPassword string) (bool, error) {
 	err := u.SetPassword(newPassword)
 	if err != nil {
 		return false, err
@@ -73,13 +75,13 @@ func (u *User) UpdatePassword(db *pg.DB, newPassword string) (bool, error) {
 }
 
 // UpdateEmail updates user's email
-func (u *User) UpdateEmail(db *pg.DB, email string) (bool, error) {
+func (u *UserAccount) UpdateEmail(db *pg.DB, email string) (bool, error) {
 	u.Email = email
 	return u.Update(db)
 }
 
 // SetPassword hashes and stores user password
-func (u *User) SetPassword(p string) error {
+func (u *UserAccount) SetPassword(p string) error {
 	password := []byte(p)
 	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	if err != nil {
@@ -90,7 +92,7 @@ func (u *User) SetPassword(p string) error {
 }
 
 // MatchPassword matches plaintext password with stored hash password
-func (u User) MatchPassword(p string) bool {
+func (u UserAccount) MatchPassword(p string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(p))
 	if err != nil {
 		return false
