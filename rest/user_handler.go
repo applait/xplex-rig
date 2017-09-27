@@ -3,13 +3,13 @@ package rest
 import (
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/applait/xplex-rig/config"
 	"github.com/applait/xplex-rig/models"
 	"github.com/applait/xplex-rig/token"
 	"github.com/go-pg/pg"
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 )
 
 // UserHandler providers handler for `/users` HTTP API
@@ -39,7 +39,7 @@ func UserHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
 // userCreate handles new user creation
 func userCreate(db *pg.DB, conf *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		u := models.User{
+		u := models.UserAccount{
 			Username: r.FormValue("username"),
 			Email:    r.FormValue("email"),
 		}
@@ -59,21 +59,22 @@ func userCreate(db *pg.DB, conf *config.Config) http.HandlerFunc {
 			errorRes(w, "User exists for specified username or email", http.StatusBadRequest)
 			return
 		}
-		log.Printf("User created. ID: %d, Username: %s\n", u.ID, u.Username)
+		log.Printf("User created. ID: %s, Username: %s\n", u.ID, u.Username)
 
 		var t string
 
 		msg := "User created"
 		payload := map[string]string{
+			"userID":   u.ID.String(),
 			"username": r.FormValue("username"),
 			"email":    r.FormValue("email"),
 			"token":    "",
 		}
 		if t, err = token.NewUserToken(u.ID, u.Username, conf.Server.JWTSecret); err != nil {
 			msg = "User created, but could not generate token"
-			log.Printf("Error creating token for new user ID %d. Reason: %s\n", u.ID, err)
+			log.Printf("Error creating token for new user ID %s. Reason: %s\n", u.ID, err)
 		} else {
-			log.Printf("Generated token for new user ID %d\n", u.ID)
+			log.Printf("Generated token for new user ID %s\n", u.ID)
 		}
 		payload["token"] = t
 		success(w, msg, http.StatusOK, payload)
@@ -100,17 +101,11 @@ func userHome(w http.ResponseWriter, r *http.Request) {
 func userPassword(db *pg.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		claims := r.Context().Value(ctxClaims).(*token.Claims)
-		userID, err := strconv.Atoi(claims.Issuer)
-		if err != nil {
-			log.Printf("Error converting user claim issuer. Reason: %s", err)
-			errorRes(w, "Invalid authorization token", http.StatusUnauthorized)
-			return
-		}
-		u := models.User{
-			ID:       userID,
+		u := models.UserAccount{
+			ID:       uuid.FromStringOrNil(claims.Issuer),
 			Username: claims.Subject,
 		}
-		if err = u.Find(db); err != nil {
+		if err := u.Find(db); err != nil {
 			errorRes(w, "Cannot update user password", http.StatusBadRequest)
 			return
 		}
@@ -127,7 +122,7 @@ func userPassword(db *pg.DB) http.HandlerFunc {
 // userAuth handles authentication of users using username and password
 func userAuth(db *pg.DB, conf *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		u := models.User{
+		u := models.UserAccount{
 			Username: r.FormValue("username"),
 		}
 		err := u.Find(db)
@@ -155,7 +150,7 @@ func userAuth(db *pg.DB, conf *config.Config) http.HandlerFunc {
 // userInvite handles generating invite codes
 func userInvite(db *pg.DB, conf *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		u := models.User{Email: r.FormValue("email")}
+		u := models.UserAccount{Email: r.FormValue("email")}
 		claims := r.Context().Value(ctxClaims).(*token.Claims)
 		err := u.Find(db)
 		if err == pg.ErrNoRows {

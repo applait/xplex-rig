@@ -1,10 +1,10 @@
 package token
 
 import (
-	"fmt"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	uuid "github.com/satori/go.uuid"
 )
 
 // Claims defines a common structure used for JWT claims in rig
@@ -14,11 +14,11 @@ type Claims struct {
 }
 
 // NewUserToken generates a JWT for users and signs with given secret
-func NewUserToken(userid int, username string, secret string) (string, error) {
+func NewUserToken(userid uuid.UUID, username string, secret string) (string, error) {
 	claims := Claims{
 		"user",
 		jwt.StandardClaims{
-			Issuer:    fmt.Sprintf("%d", userid),
+			Issuer:    userid.String(),
 			Subject:   username,
 			Audience:  "rig.xplex.me",
 			ExpiresAt: time.Now().AddDate(0, 0, 28).Unix(),

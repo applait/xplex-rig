@@ -30,7 +30,7 @@ func ConnectPG(dburi string) (*pg.DB, error) {
 // CreateSchema creates tables in Postgres from models
 func CreateSchema(db *pg.DB) error {
 	models := []interface{}{
-		&User{},
+		&UserAccount{},
 		&MultiStream{},
 		&MultiStreamConfig{},
 		&EdgeCluster{},
