@@ -3,9 +3,11 @@ package models
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/applait/xplex-rig/config"
 	"github.com/applait/xplex-rig/token"
 	"github.com/go-pg/pg"
 	uuid "github.com/satori/go.uuid"
@@ -21,13 +23,13 @@ type MultiStream struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 
-	UserAccount        *UserAccount         // MultiStream belongsTo UserAccount
-	MultiStreamConfigs []*MultiStreamConfig // MultiStream hasMany MultiStreamConfigs
+	UserAccount *UserAccount // MultiStream belongsTo UserAccount
+	Outputs     []*Output    // MultiStream hasMany Output
 }
 
-// MultiStreamConfig stores configuration information of RTMP ingestion services
+// Output stores configuration information of RTMP ingestion services
 // to push to
-type MultiStreamConfig struct {
+type Output struct {
 	ID       int
 	Service  string `sql:",notnull"`
 	Key      string `sql:",notnull"`
@@ -114,4 +116,19 @@ func (m *MultiStream) Insert(db *pg.DB) error {
 	m.UpdatedAt = time.Now()
 	m.ID = uuid.NewV4()
 	return db.Insert(m)
+}
+
+// Insert inserts new row for Output
+func (o *Output) Insert(db *pg.DB) error {
+	s, ok := config.MSServices[o.Service]
+	if !ok {
+		return errors.New("Invalid service name provided")
+	}
+	if o.Server == "" {
+		o.Server = "default"
+	}
+	if !s.HasServer(o.Server) {
+		return errors.New("Invalid server name provided")
+	}
+	return db.Insert(o)
 }

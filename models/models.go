@@ -32,7 +32,7 @@ func CreateSchema(db *pg.DB) error {
 	models := []interface{}{
 		&UserAccount{},
 		&MultiStream{},
-		&MultiStreamConfig{},
+		&Output{},
 		&EdgeCluster{},
 		&AgentNode{},
 	}
