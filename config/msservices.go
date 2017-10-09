@@ -31,6 +31,12 @@ func (m msService) RTMPUrl(key string, server string) string {
 	return u
 }
 
+// HasServer returns whether a server key is present for given msService
+func (m msService) HasServer(key string) bool {
+	_, ok := m.servers[key]
+	return ok
+}
+
 // msServiceYouTube stores YouTube's server configurations for multistreaming
 var msServiceYouTube = msService{
 	name: "YouTube / YouTube Gaming",
