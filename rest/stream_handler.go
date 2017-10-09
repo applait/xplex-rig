@@ -14,10 +14,20 @@ import (
 
 // StreamHandler providers handler for `/streams` HTTP API
 func StreamHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
+	// GET / - List configs
 	r.HandleFunc("/", streamhome).Methods("GET")
+
 	rpost := r.Methods("POST").Subrouter()
+
+	// POST / - Create a stream
 	rpost.Handle("/", newChain(auth(conf.Server.JWTSecret, "user")).use(streamCreate(db)))
+	// POST /key - Update streaming key for a stream
 	rpost.Handle("/key", newChain(required("streamID"), auth(conf.Server.JWTSecret, "user")).use(streamUpdateKey(db)))
+	// POST /output - Add config for stream
+	rpost.Handle("/output",
+		newChain(required("streamID", "service", "key"),
+			auth(conf.Server.JWTSecret, "user")).
+			use(streamAddOutput(db)))
 }
 
 func streamhome(w http.ResponseWriter, r *http.Request) {
@@ -84,5 +94,42 @@ func streamUpdateKey(db *pg.DB) http.HandlerFunc {
 		}
 		log.Printf("Updated streamkey for stream %s, user %s", m.ID, m.UserAccountID)
 		success(w, "Stream key updated.", http.StatusOK, streamUpdateRes{m.ID, m.Key})
+	}
+}
+
+type resAddOutput struct {
+	StreamID string `json:"streamID"`
+	Service  string `json:"service"`
+	Server   string `json:"server"`
+}
+
+// streamAddOutput adds an output configuration for a stream
+func streamAddOutput(db *pg.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		claims := r.Context().Value(ctxClaims).(*token.Claims)
+		ms := models.MultiStream{
+			ID:            uuid.FromStringOrNil(r.FormValue("streamID")),
+			UserAccountID: uuid.FromStringOrNil(claims.Issuer),
+		}
+		if err := ms.Find(db); err != nil {
+			errorRes(w, "Invalid stream ID or user.", http.StatusBadRequest)
+			return
+		}
+		o := models.Output{
+			Service:       r.FormValue("service"),
+			Key:           r.FormValue("key"),
+			Server:        r.FormValue("server"),
+			MultiStreamID: ms.ID,
+		}
+		if err := o.Insert(db); err != nil {
+			log.Printf("Error adding multistream output. Reason: %s", err)
+			errorRes(w, "Error adding multistream output", http.StatusBadRequest)
+			return
+		}
+		success(w, "Stream output added.", http.StatusOK, resAddOutput{
+			StreamID: ms.ID.String(),
+			Service:  o.Service,
+			Server:   o.Server,
+		})
 	}
 }
