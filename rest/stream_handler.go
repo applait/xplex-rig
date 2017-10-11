@@ -15,7 +15,8 @@ import (
 // StreamHandler providers handler for `/streams` HTTP API
 func StreamHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
 	// GET / - List configs
-	r.HandleFunc("/", streamhome).Methods("GET")
+	// r.HandleFunc("/", streamhome).Methods("GET")
+	r.Handle("/", newChain(auth(conf.Server.JWTSecret, "user")).use(streamGet(db))).Methods("GET")
 
 	rpost := r.Methods("POST").Subrouter()
 
@@ -43,6 +44,19 @@ func streamhome(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	res.Send(w)
+}
+
+// streamList retrieves streams with existing configuration outputs
+func streamGet(db *pg.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		claims := r.Context().Value(ctxClaims).(*token.Claims)
+		ms, err := models.UserStreams(uuid.FromStringOrNil(claims.Issuer), false, true, db)
+		if err != nil {
+			errorRes(w, "Error retrieving streams.", http.StatusExpectationFailed)
+			return
+		}
+		success(w, "Streams information with configurations.", http.StatusOK, ms)
+	}
 }
 
 type streamCreateRes struct {

@@ -37,7 +37,7 @@ type Output struct {
 	IsActive bool   `sql:",notnull,default:false"`
 
 	MultiStreamID uuid.UUID    `sql:",type:uuid"`
-	MultiStream   *MultiStream // MultiStreamConfig belongsTo MultiStream
+	MultiStream   *MultiStream // Output belongsTo MultiStream
 }
 
 // genKey generates multistream keys
@@ -84,6 +84,7 @@ func (m *MultiStream) Create(db *pg.DB) error {
 	if m.Key, err = genKey(m.UserAccountID); err != nil {
 		return err
 	}
+	m.IsActive = true
 	return m.Insert(db)
 }
 
@@ -130,5 +131,55 @@ func (o *Output) Insert(db *pg.DB) error {
 	if !s.HasServer(o.Server) {
 		return errors.New("Invalid server name provided")
 	}
+	o.IsActive = true
 	return db.Insert(o)
+}
+
+type resOutputDest struct {
+	ConfigID int    `json:"configID"`
+	Service  string `json:"service"`
+	IsActive bool   `json:"isActive"`
+	URL      string `json:"url"`
+}
+
+// ResStreamConfig produces output for stream configurations
+type ResStreamConfig struct {
+	StreamID     uuid.UUID       `json:"streamID"`
+	StreamKey    string          `json:"streamKey"`
+	IsActive     bool            `json:"isActive"`
+	Destinations []resOutputDest `json:"destinations"`
+}
+
+// UserStreams returns config of streams for given user
+func UserStreams(uid uuid.UUID, isStreaming bool, isActive bool, db *pg.DB) ([]ResStreamConfig, error) {
+	var ms []MultiStream
+	var o []ResStreamConfig
+	err := db.Model(&ms).
+		Column("Outputs").
+		Where("multi_stream.user_account_id = ?", uid).
+		Where("multi_stream.is_streaming = ?", isStreaming).
+		Where("multi_stream.is_active = ?", isActive).
+		Select()
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range ms {
+		el := ResStreamConfig{
+			StreamID:  m.ID,
+			StreamKey: m.Key,
+			IsActive:  m.IsActive,
+		}
+		for _, mo := range m.Outputs {
+			s := config.MSServices[mo.Service]
+			odest := resOutputDest{
+				ConfigID: mo.ID,
+				Service:  mo.Service,
+				IsActive: mo.IsActive,
+				URL:      s.RTMPUrl(mo.Key, mo.Server),
+			}
+			el.Destinations = append(el.Destinations, odest)
+		}
+		o = append(o, el)
+	}
+	return o, nil
 }
