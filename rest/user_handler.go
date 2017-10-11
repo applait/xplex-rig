@@ -14,20 +14,20 @@ import (
 
 // UserHandler providers handler for `/users` HTTP API
 func UserHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
+	authChain := newChain(auth(conf.Server.JWTSecret, "user"))
+
 	// Route for `GET /users/`
 	r.HandleFunc("/", userHome).Methods("GET")
 
 	rpost := r.Methods("POST").Subrouter()
 	// Route for updating password
-	rpost.Handle("/password", newChain(required("password"), auth(conf.Server.JWTSecret, "user")).
-		use(userPassword(db)))
+	rpost.Handle("/password", authChain.add(required("password")).use(userPassword(db)))
 
 	// Route for authenticating user using username and password
 	rpost.Handle("/auth", newChain(required("username", "password")).use(userAuth(db, conf)))
 
 	// Route for generating new user invite
-	rpost.Handle("/invite", newChain(required("email"), auth(conf.Server.JWTSecret, "user")).
-		use(userInvite(db, conf)))
+	rpost.Handle("/invite", authChain.add(required("email")).use(userInvite(db, conf)))
 
 	// Route for generating new user invite
 	rpost.Handle("/invite/verify", newChain(required("inviteToken", "email")).use(userInviteVerify(db, conf)))

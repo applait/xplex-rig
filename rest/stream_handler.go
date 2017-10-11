@@ -14,36 +14,20 @@ import (
 
 // StreamHandler providers handler for `/streams` HTTP API
 func StreamHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
+	authChain := newChain(auth(conf.Server.JWTSecret, "user"))
+
 	// GET / - List configs
 	// r.HandleFunc("/", streamhome).Methods("GET")
-	r.Handle("/", newChain(auth(conf.Server.JWTSecret, "user")).use(streamGet(db))).Methods("GET")
+	r.Handle("/", authChain.use(streamGet(db))).Methods("GET")
 
 	rpost := r.Methods("POST").Subrouter()
 
 	// POST / - Create a stream
-	rpost.Handle("/", newChain(auth(conf.Server.JWTSecret, "user")).use(streamCreate(db)))
+	rpost.Handle("/", authChain.use(streamCreate(db)))
 	// POST /key - Update streaming key for a stream
-	rpost.Handle("/key", newChain(required("streamID"), auth(conf.Server.JWTSecret, "user")).use(streamUpdateKey(db)))
+	rpost.Handle("/key", authChain.add(required("streamID")).use(streamUpdateKey(db)))
 	// POST /output - Add config for stream
-	rpost.Handle("/output",
-		newChain(required("streamID", "service", "key"),
-			auth(conf.Server.JWTSecret, "user")).
-			use(streamAddOutput(db)))
-}
-
-func streamhome(w http.ResponseWriter, r *http.Request) {
-	res := Res{
-		Msg:    "Streams API",
-		Status: 200,
-		Payload: []string{
-			"POST /",
-			"GET /config",
-			"POST /config",
-			"POST /key",
-			"GET /list",
-		},
-	}
-	res.Send(w)
+	rpost.Handle("/output", authChain.add(required("streamID", "service", "key")).use(streamAddOutput(db)))
 }
 
 // streamList retrieves streams with existing configuration outputs
