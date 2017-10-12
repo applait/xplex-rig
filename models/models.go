@@ -33,8 +33,7 @@ func CreateSchema(db *pg.DB) error {
 		&UserAccount{},
 		&MultiStream{},
 		&Output{},
-		&EdgeCluster{},
-		&AgentNode{},
+		&Agent{},
 	}
 	for _, model := range models {
 		err := db.CreateTable(model, &orm.CreateTableOptions{
