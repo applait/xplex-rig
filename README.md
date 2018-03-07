@@ -14,12 +14,12 @@ What it does:
 ## Install
 
 - [Install Golang 1.9+](https://golang.org/doc/install)
-- Install [Glide](https://github.com/Masterminds/glide)
+- Install [dep](https://golang.github.io/dep/docs/installation.html)
 
 In project root, run:
 
 ```sh
-$ glide install
+$ dep ensure
 ```
 
 Compile debug builds using `build.sh`:
@@ -35,4 +35,3 @@ $ ./build.sh release
 ```
 
 Compiled binaries are put in `./bin/`.
-
