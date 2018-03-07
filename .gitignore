@@ -6,7 +6,8 @@
 /data/
 
 # Ignore /vendor
-/vendor/
+vendor/
+_vendor-*/
 
 # Ignore /bin
 /bin/
