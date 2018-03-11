@@ -2,14 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 
-	"github.com/applait/xplex-rig/config"
-	"github.com/applait/xplex-rig/models"
-	"github.com/applait/xplex-rig/rest"
+	"github.com/applait/xplex-rig/common"
 )
 
 func main() {
@@ -19,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	if *createConfig {
-		_, err := config.CreateConfig(*confPath)
+		_, err := common.CreateConfig(*confPath)
 		if err != nil {
 			log.Fatalf("Unable to generate config file. Reason: %s\n", err)
 		}
@@ -27,17 +23,17 @@ func main() {
 		os.Exit(0)
 	}
 
-	// TODO: parse config based on environment
-	conf, err := config.ParseConfig(*confPath)
+	conf, err := common.ParseConfig(*confPath)
 	if err != nil {
 		log.Fatalf("Error loading config. Reason: %s", err)
 	}
 
 	// Run server
-	db, err := models.ConnectPG(conf.PostgresURL)
+	err = common.ConnectDB(conf.PostgresURL)
 	if err != nil {
 		log.Fatalf("Error connecting to database. Reason: %s", err)
 	}
 	log.Printf("Starting HTTP server on port %d", conf.Port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), rest.Start(db, &conf)))
+	printConf()
+	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), rest.Start(db, &conf)))
 }

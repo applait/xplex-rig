@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/dgrijalva/jwt-go"
-  packages = ["."]
-  revision = "dbeaa9332f19a944acb5736b4456cfcc02140e29"
-  version = "v3.1.0"
-
-[[projects]]
   name = "github.com/go-pg/pg"
   packages = [
     ".",
@@ -36,7 +30,16 @@
   branch = "master"
   name = "github.com/jinzhu/inflection"
   packages = ["."]
-  revision = "1c35d901db3da928c72a72d8458480cc9ade058f"
+  revision = "04140366298a54a039076d798123ffa108fff46c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/lib/pq"
+  packages = [
+    ".",
+    "oid"
+  ]
+  revision = "88edab0803230a3898347e77b474f8c1820a1f20"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -51,11 +54,11 @@
     "bcrypt",
     "blowfish"
   ]
-  revision = "85f98707c97e11569271e4d9b3d397e079c4f4d0"
+  revision = "c7dcf104e3a7a1417abc0230cb0d5240d764159d"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e28c69afc4ecc34b4e182bef08703d8b5fce70e6ca7a980e36f4adfcf6005b0d"
+  inputs-digest = "f0bac1532dc1c7664f34a1fd171f5f137cfe68454ecdb42f4773087ba245b153"
   solver-name = "gps-cdcl"
   solver-version = 1
