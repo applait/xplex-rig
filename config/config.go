@@ -6,15 +6,19 @@ package config
 import "io/ioutil"
 import "encoding/json"
 
-type serverConfig struct {
-	Port        int    `json:"port"`
-	JWTSecret   string `json:"jwtsecret"`
-	PostgresURL string `json:"postgresUrl"`
+// JWTKeys defines the different keys used by rig to sign and verify JWTs for different use cases. These keys need to be
+// shared across all rig instances.
+type JWTKeys struct {
+	Users  string `json:"users"`
+	Agents string `json:"agents"`
+	Admins string `json:"admins"`
 }
 
 // Config holds the structure for configuration
 type Config struct {
-	Server serverConfig `json:"server"`
+	Port        int     `json:"port"`
+	JWTKeys     JWTKeys `json:"jwtKeys"`
+	PostgresURL string  `json:"postgresUrl"`
 }
 
 // ParseConfig parses a configuration file and loads into a config
@@ -34,13 +38,15 @@ func ParseConfig(confPath string) (Config, error) {
 // CreateConfig generates a default JSON config file and writes to the given path
 func CreateConfig(confPath string) (Config, error) {
 	c := Config{
-		serverConfig{
-			Port:        8081,
-			JWTSecret:   "replacemewithanicelongstringthatyouwillnotsharewithothers",
-			PostgresURL: "postgres://user:pass@host/db",
+		Port: 8081,
+		JWTKeys: JWTKeys{
+			Users:  "keyhere",
+			Agents: "keyhere",
+			Admins: "keyhere",
 		},
+		PostgresURL: "postgres://user:pass@host/db",
 	}
-	j, err := json.Marshal(c)
+	j, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return c, err
 	}

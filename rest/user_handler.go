@@ -14,7 +14,7 @@ import (
 
 // UserHandler providers handler for `/users` HTTP API
 func UserHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
-	authChain := newChain(auth(conf.Server.JWTSecret, "user"))
+	authChain := newChain(auth(conf.JWTKeys.Users, "user"))
 
 	// Route for `GET /users/`
 	r.HandleFunc("/", userHome).Methods("GET")
@@ -70,7 +70,7 @@ func userCreate(db *pg.DB, conf *config.Config) http.HandlerFunc {
 			"email":    r.FormValue("email"),
 			"token":    "",
 		}
-		if t, err = token.NewUserToken(u.ID, u.Username, conf.Server.JWTSecret); err != nil {
+		if t, err = token.NewUserToken(u.ID, u.Username, conf.JWTKeys.Users); err != nil {
 			msg = "User created, but could not generate token"
 			log.Printf("Error creating token for new user ID %s. Reason: %s\n", u.ID, err)
 		} else {
@@ -135,7 +135,7 @@ func userAuth(db *pg.DB, conf *config.Config) http.HandlerFunc {
 			errorRes(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		t, err := token.NewUserToken(u.ID, u.Username, conf.Server.JWTSecret)
+		t, err := token.NewUserToken(u.ID, u.Username, conf.JWTKeys.Users)
 		if err != nil {
 			log.Printf("Error creating auth token for user ID %d. Reason: %s\n", u.ID, err)
 			errorRes(w, "Unable to create auth token", http.StatusInternalServerError)
@@ -154,7 +154,7 @@ func userInvite(db *pg.DB, conf *config.Config) http.HandlerFunc {
 		claims := r.Context().Value(ctxClaims).(*token.Claims)
 		err := u.Find(db)
 		if err == pg.ErrNoRows {
-			t, err := token.NewInviteToken(claims.Issuer, r.FormValue("email"), conf.Server.JWTSecret)
+			t, err := token.NewInviteToken(claims.Issuer, r.FormValue("email"), conf.JWTKeys.Users)
 			if err != nil {
 				log.Printf("Error creating invite token. senderId: %s, email: %s. Reason: %s",
 					r.FormValue("senderId"), r.FormValue("email"), err)
@@ -177,7 +177,7 @@ func userInvite(db *pg.DB, conf *config.Config) http.HandlerFunc {
 // userInviteVerify validates invite token
 func userInviteVerify(db *pg.DB, conf *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		t, err := token.ParseToken(r.FormValue("inviteToken"), conf.Server.JWTSecret)
+		t, err := token.ParseToken(r.FormValue("inviteToken"), conf.JWTKeys.Users)
 		if err != nil || t.IssuerType != "invite" || t.Subject != r.FormValue("email") {
 			errorRes(w, "Error verifying invite token", http.StatusNotAcceptable)
 			return
