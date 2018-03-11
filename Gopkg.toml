@@ -30,10 +30,6 @@
   version = "3.1.0"
 
 [[constraint]]
-  name = "github.com/go-pg/pg"
-  version = "6.10.0"
-
-[[constraint]]
   name = "github.com/gorilla/mux"
   version = "1.6.1"
 
@@ -41,6 +37,14 @@
   name = "github.com/satori/go.uuid"
   version = "1.2.0"
 
+[[constraint]]
+  name = "github.com/lib/pq"
+  branch = "master"
+
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/crypto"

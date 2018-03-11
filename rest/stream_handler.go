@@ -4,17 +4,17 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/applait/xplex-rig/config"
+	"github.com/applait/xplex-rig/common"
+	"github.com/applait/xplex-rig/lib/token"
 	"github.com/applait/xplex-rig/models"
-	"github.com/applait/xplex-rig/token"
 	"github.com/go-pg/pg"
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 )
 
 // StreamHandler providers handler for `/streams` HTTP API
-func StreamHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
-	authChain := newChain(auth(conf.JWTKeys.Users, "user"))
+func StreamHandler(r *mux.Router) {
+	authChain := newChain(auth(common.Config.JWTKeys.Users, "user"))
 
 	// GET / - List configs
 	// r.HandleFunc("/", streamhome).Methods("GET")
