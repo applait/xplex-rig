@@ -2,10 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/applait/xplex-rig/common"
+	"github.com/applait/xplex-rig/rest"
 )
 
 func main() {
@@ -34,6 +37,5 @@ func main() {
 		log.Fatalf("Error connecting to database. Reason: %s", err)
 	}
 	log.Printf("Starting HTTP server on port %d", conf.Port)
-	printConf()
-	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), rest.Start(db, &conf)))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), rest.Start()))
 }

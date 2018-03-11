@@ -60,7 +60,7 @@ func GetUserByEmail(email string) (common.UserAccount, error) {
 }
 
 // CreateUser creates a new user account
-func CreateUser(u common.UserAccount) error {
+func CreateUser(u *common.UserAccount) error {
 	createQuery := `
     insert into user_accounts
       (id, username, email, password, is_active, created_at, updated_at)
