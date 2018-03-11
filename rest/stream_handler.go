@@ -113,7 +113,7 @@ func streamAddOutput(db *pg.DB) http.HandlerFunc {
 			errorRes(w, "Invalid stream ID or user.", http.StatusBadRequest)
 			return
 		}
-		o := models.Output{
+		o := models.Destination{
 			Service:       r.FormValue("service"),
 			Key:           r.FormValue("key"),
 			Server:        r.FormValue("server"),
