@@ -63,7 +63,7 @@ func streamCreate(db *pg.DB) http.HandlerFunc {
 			return
 		}
 		log.Printf("New multistream created. Stream ID: %s, user ID: %s", m.ID, m.UserAccountID)
-		success(w, "Stream created.", http.StatusOK, streamCreateRes{m.ID, m.Key, m.IsActive, m.UserAccountID})
+		success(w, "Stream created.", http.StatusOK, streamCreateRes{m.ID, m.StreamKey, m.IsActive, m.UserAccountID})
 	}
 }
 
@@ -91,7 +91,7 @@ func streamUpdateKey(db *pg.DB) http.HandlerFunc {
 			return
 		}
 		log.Printf("Updated streamkey for stream %s, user %s", m.ID, m.UserAccountID)
-		success(w, "Stream key updated.", http.StatusOK, streamUpdateRes{m.ID, m.Key})
+		success(w, "Stream key updated.", http.StatusOK, streamUpdateRes{m.ID, m.StreamKey})
 	}
 }
 

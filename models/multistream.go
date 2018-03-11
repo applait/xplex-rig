@@ -16,15 +16,15 @@ import (
 // MultiStream stores information of multi-streaming keys for users
 type MultiStream struct {
 	ID            uuid.UUID `sql:",pk,type:uuid"`
-	Key           string    `sql:",unique,notnull"`
+	StreamKey     string    `sql:",unique,notnull"`
 	IsActive      bool      `sql:",notnull,default:false"`
 	IsStreaming   bool      `sql:",notnull,default:false"`
 	UserAccountID uuid.UUID `sql:",type:uuid"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 
-	UserAccount *UserAccount // MultiStream belongsTo UserAccount
-	Outputs     []*Output    // MultiStream hasMany Output
+	UserAccount  *UserAccount // MultiStream belongsTo UserAccount
+	Destinations []*Output    // MultiStream hasMany Output
 }
 
 // Output stores configuration information of RTMP ingestion services
@@ -58,8 +58,8 @@ func (m *MultiStream) Find(db *pg.DB) error {
 	if m.ID != uuid.Nil {
 		q.Where("multi_stream.id = ?", m.ID)
 	}
-	if m.Key != "" {
-		q.Where("multi_stream.key = ?", m.Key)
+	if m.StreamKey != "" {
+		q.Where("multi_stream.key = ?", m.StreamKey)
 	}
 	if m.IsActive {
 		q.Where("multi_stream.is_active = ?", true)
@@ -81,7 +81,7 @@ func (m *MultiStream) Create(db *pg.DB) error {
 	if err != nil {
 		return err
 	}
-	if m.Key, err = genKey(m.UserAccountID); err != nil {
+	if m.StreamKey, err = genKey(m.UserAccountID); err != nil {
 		return err
 	}
 	m.IsActive = true
@@ -107,7 +107,7 @@ func (m *MultiStream) UpdateKey(db *pg.DB) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	m.Key = key
+	m.StreamKey = key
 	return m.Update(db)
 }
 
@@ -166,10 +166,10 @@ func UserStreams(uid uuid.UUID, isStreaming bool, isActive bool, db *pg.DB) ([]R
 	for _, m := range ms {
 		el := ResStreamConfig{
 			StreamID:  m.ID,
-			StreamKey: m.Key,
+			StreamKey: m.StreamKey,
 			IsActive:  m.IsActive,
 		}
-		for _, mo := range m.Outputs {
+		for _, mo := range m.Destinations {
 			s := config.MSServices[mo.Service]
 			odest := resOutputDest{
 				ConfigID: mo.ID,
