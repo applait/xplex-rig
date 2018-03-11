@@ -14,7 +14,7 @@ import (
 
 // StreamHandler providers handler for `/streams` HTTP API
 func StreamHandler(r *mux.Router, db *pg.DB, conf *config.Config) {
-	authChain := newChain(auth(conf.Server.JWTSecret, "user"))
+	authChain := newChain(auth(conf.JWTKeys.Users, "user"))
 
 	// GET / - List configs
 	// r.HandleFunc("/", streamhome).Methods("GET")
