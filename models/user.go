@@ -11,12 +11,12 @@ import (
 // UserAccount is used to store user information
 type UserAccount struct {
 	ID        uuid.UUID `sql:",pk,type:uuid"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Username  string `sql:",unique,notnull"`
-	Email     string `sql:",unique,notnull"`
-	Password  string `sql:",notnull"`
-	IsActive  bool   `sql:",notnull,default:false"`
+	Username  string    `sql:",unique,notnull"`
+	Email     string    `sql:",unique,notnull"`
+	Password  string    `json:"-"` // Ignore this field if this struct is marshalled to JSON
+	IsActive  bool      `sql:",notnull,default:false"`
+	CreatedAt time.Time `sql:",notnull"`
+	UpdatedAt time.Time `sql:",notnull"`
 
 	MultiStreams []*MultiStream // UserAccount hasMany MultiStream
 }
