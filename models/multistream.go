@@ -23,13 +23,13 @@ type MultiStream struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 
-	UserAccount  *UserAccount // MultiStream belongsTo UserAccount
-	Destinations []*Output    // MultiStream hasMany Output
+	UserAccount  *UserAccount   // MultiStream belongsTo UserAccount
+	Destinations []*Destination // MultiStream hasMany Output
 }
 
-// Output stores configuration information of RTMP ingestion services
+// Destination stores configuration information of RTMP ingestion services
 // to push to
-type Output struct {
+type Destination struct {
 	ID       int
 	Service  string `sql:",notnull"`
 	Key      string `sql:",notnull"`
@@ -120,7 +120,7 @@ func (m *MultiStream) Insert(db *pg.DB) error {
 }
 
 // Insert inserts new row for Output
-func (o *Output) Insert(db *pg.DB) error {
+func (o *Destination) Insert(db *pg.DB) error {
 	s, ok := config.MSServices[o.Service]
 	if !ok {
 		return errors.New("Invalid service name provided")
