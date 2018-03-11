@@ -30,13 +30,16 @@ function buildRelease {
 }
 
 function migrate {
+  if [ -z ${DATABASE_URL+x} ] || [ -z ${DATABASE_URL} ]; then
+    echo "Set Postgresql connection URI in the 'DATABASE_URL' environment variable"
+    exit 1
+  fi
     if [ ! -f ./bin/migrate ]; then
         echo "Downloading migrate cli"
         curl -Ls https://github.com/golang-migrate/migrate/releases/download/v3.2.0/migrate.linux-amd64.tar.gz | tar xz
         mv ./migrate.linux-amd64 ./bin/migrate
         echo "Installed migrate cli at ./bin/migrate"
     fi
-    echo "DATABASE_URL: $DATABASE_URL"
     opts="--path ./migrations/ --database ${DATABASE_URL}"
     ./bin/migrate $opts $@
 }
