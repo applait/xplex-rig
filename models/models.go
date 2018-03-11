@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/orm"
 )
 
 // ConnectPG connects to a Postgres database given a connection URI and returns
@@ -25,24 +24,4 @@ func ConnectPG(dburi string) (*pg.DB, error) {
 		log.Printf("%s %s", time.Since(event.StartTime), query)
 	})
 	return db, nil
-}
-
-// CreateSchema creates tables in Postgres from models
-func CreateSchema(db *pg.DB) error {
-	models := []interface{}{
-		&UserAccount{},
-		&MultiStream{},
-		&Output{},
-		&Agent{},
-	}
-	for _, model := range models {
-		err := db.CreateTable(model, &orm.CreateTableOptions{
-			IfNotExists:   true,
-			FKConstraints: true,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
