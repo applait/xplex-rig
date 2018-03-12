@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/applait/xplex-rig/common"
+	validator "gopkg.in/validator.v2"
 
 	"github.com/applait/xplex-rig/account"
 
@@ -27,7 +28,6 @@ func accountHandler(r *mux.Router) {
 	// Ensure all other routes here are authenticated as a user
 	rpost.Use(ensureAuthenticatedUser)
 	// Route for updating password
-	// rpost.Handle("/password", required(userPassword, "oldPassword", "newPassword"))
 	rpost.HandleFunc("/password", userPassword)
 	// Route for generating new user invite
 	rpost.HandleFunc("/invite", userInvite)
@@ -35,9 +35,9 @@ func accountHandler(r *mux.Router) {
 
 // userCreateReq defines request data type for user create
 type userCreateReq struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"min=3,max=64"`
+	Email    string `json:"email" validate:"min=3,max=64"`
+	Password string `json:"password" validate:"min=8"`
 }
 
 // userCreate handles new user creation
@@ -45,6 +45,13 @@ func userCreate(w http.ResponseWriter, r *http.Request) {
 	var req userCreateReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		ErrInvalidInput.Send(w)
+		return
+	}
+	if err := validator.Validate(req); err != nil {
+		e := ErrInvalidInput
+		e.Details = err
+		e.Send(w)
+		return
 	}
 	u := common.UserAccount{
 		Username: req.Username,
@@ -71,8 +78,8 @@ func userCreate(w http.ResponseWriter, r *http.Request) {
 
 // userPasswordReq defines request data type for user password
 type userPasswordReq struct {
-	OldPassword string `json:"oldPassword"`
-	NewPassword string `json:"newPassword"`
+	OldPassword string `json:"oldPassword" validate:"min=8"`
+	NewPassword string `json:"newPassword" validate:"min=8"`
 }
 
 // userPassword updates a given password for current user in the database.
@@ -82,6 +89,12 @@ func userPassword(w http.ResponseWriter, r *http.Request) {
 	var req userPasswordReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		ErrInvalidInput.Send(w)
+		return
+	}
+	if err := validator.Validate(req); err != nil {
+		e := ErrInvalidInput
+		e.Details = err
+		e.Send(w)
 		return
 	}
 	id := uuid.FromStringOrNil(claims.Issuer)
@@ -101,8 +114,8 @@ func userPassword(w http.ResponseWriter, r *http.Request) {
 
 // userAuthReq defines request type for user auth using local strategy
 type userAuthReq struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"nonzero"`
+	Password string `json:"password" validate:"nonzero,min=8"`
 }
 
 // userAuth handles authentication of users using username and password
@@ -110,6 +123,12 @@ func userAuth(w http.ResponseWriter, r *http.Request) {
 	var req userAuthReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		ErrInvalidInput.Send(w)
+		return
+	}
+	if err := validator.Validate(req); err != nil {
+		e := ErrInvalidInput
+		e.Details = err
+		e.Send(w)
 		return
 	}
 	t, err := account.AuthLocal(req.Username, req.Password)
@@ -128,7 +147,7 @@ func userAuth(w http.ResponseWriter, r *http.Request) {
 
 // userInviteReq defines request type for generating invite codes
 type userInviteReq struct {
-	Email string `json:"email"`
+	Email string `json:"email" validate:"nonzero"`
 }
 
 // userInvite handles generating invite codes
@@ -136,6 +155,12 @@ func userInvite(w http.ResponseWriter, r *http.Request) {
 	var req userInviteReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		ErrInvalidInput.Send(w)
+		return
+	}
+	if err := validator.Validate(req); err != nil {
+		e := ErrInvalidInput
+		e.Details = err
+		e.Send(w)
 		return
 	}
 	claims := r.Context().Value(ctxClaims).(*account.Claims)
@@ -170,8 +195,8 @@ func userInvite(w http.ResponseWriter, r *http.Request) {
 
 // userInviteVerifyReq defines request type for verifying invite codes
 type userInviteVerifyReq struct {
-	Email       string `json:"email"`
-	InviteToken string `json:"inviteToken"`
+	Email       string `json:"email" validate:"nonzero"`
+	InviteToken string `json:"inviteToken" validate:"nonzero"`
 }
 
 // userInviteVerify validates invite token
@@ -179,6 +204,12 @@ func userInviteVerify(w http.ResponseWriter, r *http.Request) {
 	var req userInviteVerifyReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		ErrInvalidInput.Send(w)
+		return
+	}
+	if err := validator.Validate(req); err != nil {
+		e := ErrInvalidInput
+		e.Details = err
+		e.Send(w)
 		return
 	}
 	t, err := account.ParseUserToken(req.InviteToken)
