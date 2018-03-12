@@ -32,6 +32,7 @@ func (r Success) Send(w http.ResponseWriter) (int, error) {
 // Start bootstraps the REST API
 func Start() *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
+	r.Use(ensureContentType)
 	r.NotFoundHandler = notFoundHandler
 	r.MethodNotAllowedHandler = methodNotAllowedHandler
 

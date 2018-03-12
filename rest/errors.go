@@ -43,37 +43,44 @@ var ErrMethodNotAllowed = Error{
 	Status:    http.StatusMethodNotAllowed,
 }
 
+// ErrUnsupportedMediaType is used when incoming request does not match Content-Type header
+var ErrUnsupportedMediaType = Error{
+	Message:   "Content-Type should be application/json",
+	ErrorCode: 1002,
+	Status:    http.StatusUnsupportedMediaType,
+}
+
 // ErrInvalidCredentials is used when requester does not have access to an API resource
 var ErrInvalidCredentials = Error{
 	Message:   "Invalid credentials",
-	ErrorCode: 1002,
+	ErrorCode: 1003,
 	Status:    http.StatusUnauthorized,
 }
 
 // ErrMissingInput is used when a required input field is missing in an API request
 var ErrMissingInput = Error{
 	Message:   "Missing required input",
-	ErrorCode: 1003,
+	ErrorCode: 1004,
 	Status:    http.StatusBadRequest,
 }
 
 // ErrInvalidInput is used when request contains proper fields but invalid data
 var ErrInvalidInput = Error{
 	Message:   "Invalid input",
-	ErrorCode: 1004,
+	ErrorCode: 1005,
 	Status:    http.StatusBadRequest,
 }
 
 // ErrCreateResource is used when a resource cannot be created. This is used for any resources being created.
 var ErrCreateResource = Error{
 	Message:   "Unable to create resource",
-	ErrorCode: 1005,
+	ErrorCode: 1006,
 	Status:    http.StatusBadRequest,
 }
 
 // ErrUpdateResource is used when a resource cannot be updated
 var ErrUpdateResource = Error{
 	Message:   "Unable to update resource",
-	ErrorCode: 1006,
+	ErrorCode: 1007,
 	Status:    http.StatusBadRequest,
 }
