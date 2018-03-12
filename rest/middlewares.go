@@ -4,7 +4,6 @@ package rest
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -23,15 +22,17 @@ const (
 // in request body or query
 func required(next http.HandlerFunc, fields ...string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var missing []string
 		for _, f := range fields {
 			if r.FormValue(f) == "" {
-				o := Res{
-					Msg:    fmt.Sprintf("Field %s is required", f),
-					Status: http.StatusBadRequest,
-				}
-				o.Send(w)
-				return
+				missing = append(missing, f)
 			}
+		}
+		if len(missing) > 0 {
+			o := ErrMissingInput
+			o.Details = missing
+			o.Send(w)
+			return
 		}
 		next.ServeHTTP(w, r)
 	})
@@ -43,15 +44,27 @@ func ensureAuthenticatedUser(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		a := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
 		if len(a) != 2 || a[0] != "Bearer" {
-			errorRes(w, "Invalid Authorization header. Authorization header needs Bearer token.", http.StatusUnauthorized)
+			e := ErrInvalidCredentials
+			e.Message = "Invalid Authorization header. Authorization header needs Bearer token"
+			e.Send(w)
 			return
 		}
 		claims, err := account.ParseUserToken(a[1])
 		if err != nil || claims.IssuerType != "user" {
-			errorRes(w, "Invalid authorization token.", http.StatusUnauthorized)
+			ErrInvalidCredentials.Send(w)
 			return
 		}
 		ctx := context.WithValue(r.Context(), ctxClaims, claims)
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+// Triggered when no matching routes are found
+var notFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ErrNotFound.Send(w)
+})
+
+// Triggered when method is not allowed on handler
+var methodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ErrMethodNotAllowed.Send(w)
+})

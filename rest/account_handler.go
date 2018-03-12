@@ -16,8 +16,6 @@ import (
 func accountHandler(r *mux.Router) {
 	// Route for creating new user
 	r.Methods("POST").Path("/").Handler(required(userCreate, "username", "password", "email"))
-	// Route for listing /accounts API info
-	r.Methods("GET").Path("/").HandlerFunc(userHome)
 	// Route for authenticating user using username and password
 	r.Methods("POST").Path("/auth/local").Handler(required(userAuth, "username", "password"))
 	// Route for generating new user invite
@@ -41,33 +39,20 @@ func userCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	err := account.CreateUser(&u)
 	if err != nil {
-		errorRes(w, "Unable to create user", http.StatusExpectationFailed)
+		e := ErrCreateResource
+		e.Message = "Cannot create user account."
+		e.Send(w)
 		return
 	}
 	log.Printf("User created. ID: %s, Username: %s\n", u.ID, u.Username)
-
-	msg := "User created"
-	payload := map[string]string{
+	var s Success
+	s.Message = "User created"
+	s.Payload = map[string]string{
 		"userID":   u.ID.String(),
 		"username": r.FormValue("username"),
 		"email":    r.FormValue("email"),
 	}
-	success(w, msg, http.StatusOK, payload)
-}
-
-func userHome(w http.ResponseWriter, r *http.Request) {
-	res := Res{
-		Msg:    "Users API",
-		Status: 200,
-		Payload: []string{
-			"POST /accounts/ - Create new user account",
-			"POST /accounts/password - Update user password",
-			"POST /accounts/auth/local - Authenticate using username and password",
-			"POST /accounts/invite - Create an invite for a new user account",
-			"POST /accounts/invite/verify - Verify an invite using email and invite token",
-		},
-	}
-	res.Send(w)
+	s.Send(w)
 }
 
 // userPassword updates a given password for current user in the database.
@@ -76,59 +61,80 @@ func userPassword(w http.ResponseWriter, r *http.Request) {
 	claims := r.Context().Value(ctxClaims).(*account.Claims)
 	id := uuid.FromStringOrNil(claims.Issuer)
 	if err := account.ChangePassword(id, r.FormValue("oldPassword"), r.FormValue("newPassword")); err != nil {
-		errorRes(w, "Cannot update user password", http.StatusBadRequest)
+		e := ErrUpdateResource
+		e.Message = "Cannot update user password"
+		e.Send(w)
 		return
 	}
-	success(w, "User password changed", http.StatusOK, map[string]string{
+	var s Success
+	s.Message = "User password changed"
+	s.Payload = map[string]string{
 		"userName": claims.Subject,
-	})
+	}
+	s.Send(w)
 }
 
 // userAuth handles authentication of users using username and password
 func userAuth(w http.ResponseWriter, r *http.Request) {
 	t, err := account.AuthLocal(r.FormValue("username"), r.FormValue("password"))
 	if err != nil {
-		errorRes(w, "Invalid credentials", http.StatusUnauthorized)
+		ErrInvalidCredentials.Send(w)
 		return
 	}
-	success(w, "Authentication successful", http.StatusOK, map[string]string{
+	var s Success
+	s.Message = "Authentication successful"
+	s.Payload = map[string]string{
 		"username": r.FormValue("username"),
 		"token":    t,
-	})
+	}
+	s.Send(w)
 }
 
 // userInvite handles generating invite codes
 func userInvite(w http.ResponseWriter, r *http.Request) {
 	claims := r.Context().Value(ctxClaims).(*account.Claims)
+	e := ErrCreateResource
 	_, err := account.GetUserByEmail(r.FormValue("email"))
 	if err == sql.ErrNoRows {
 		t, err := account.NewInviteToken(claims.Issuer, r.FormValue("email"))
 		if err != nil {
 			log.Printf("Error creating invite token. senderId: %s, email: %s. Reason: %s",
 				r.FormValue("senderId"), r.FormValue("email"), err)
-			errorRes(w, "Unable to create invite", http.StatusInternalServerError)
+			e.Message = "Unable to create invite"
+			e.Status = http.StatusInternalServerError
+			e.Send(w)
+			return
 		}
-		success(w, "Invite created", http.StatusOK, map[string]string{
+		var s Success
+		s.Message = "Invite created"
+		s.Payload = map[string]string{
 			"email": r.FormValue("email"),
 			"token": t,
-		})
+		}
+		s.Send(w)
 		return
 	}
 	if err == nil {
-		errorRes(w, "Email is already registered.", http.StatusPreconditionFailed)
+		e.Message = "Email is already registered"
+		e.Send(w)
 		return
 	}
-	errorRes(w, "Unable to create invite.", http.StatusInternalServerError)
+	e.Send(w)
 }
 
 // userInviteVerify validates invite token
 func userInviteVerify(w http.ResponseWriter, r *http.Request) {
 	t, err := account.ParseUserToken(r.FormValue("inviteToken"))
 	if err != nil || t.IssuerType != "invite" || t.Subject != r.FormValue("email") {
-		errorRes(w, "Error verifying invite token", http.StatusNotAcceptable)
+		e := ErrInvalidInput
+		e.Message = "Error verifying invite token"
+		e.Send(w)
 		return
 	}
-	success(w, "Invite verified.", http.StatusOK, map[string]string{
+	var s Success
+	s.Message = "Invite verified."
+	s.Payload = map[string]string{
 		"email": t.Subject,
-	})
+	}
+	s.Send(w)
 }
