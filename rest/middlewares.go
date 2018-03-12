@@ -18,23 +18,18 @@ const (
 	ctxClaims ctxKey = iota + 1
 )
 
-// required returns a middleware that requires some fields to be present
-// in request body or query
-func required(next http.HandlerFunc, fields ...string) http.Handler {
+// ensureContentType determines that POST, PUT and PATCH requests use `Content-Type: application/json`
+func ensureContentType(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var missing []string
-		for _, f := range fields {
-			if r.FormValue(f) == "" {
-				missing = append(missing, f)
-			}
-		}
-		if len(missing) > 0 {
-			o := ErrMissingInput
-			o.Details = missing
-			o.Send(w)
+		if !(r.Method == "POST" || r.Method == "PUT" || r.Method == "PATCH") {
+			h.ServeHTTP(w, r)
 			return
 		}
-		next.ServeHTTP(w, r)
+		if r.Header.Get("Content-Type") == "application/json" {
+			h.ServeHTTP(w, r)
+			return
+		}
+		ErrUnsupportedMediaType.Send(w)
 	})
 }
 
