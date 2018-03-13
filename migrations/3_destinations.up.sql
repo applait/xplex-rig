@@ -18,9 +18,6 @@ create table destinations (
   -- Stream key of the destination. This will be the streaming key given by the user for the service
   stream_key text not null,
 
-  -- Which specific server to push the stream to
-  server text not null default 'default',
-
   -- Whether this destination is active or not
   is_active boolean not null default false,
 
