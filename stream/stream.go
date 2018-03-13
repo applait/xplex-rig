@@ -20,13 +20,13 @@ func createStreamKey(userID uuid.UUID, streamID uuid.UUID) string {
 func GetStreamByID(streamID uuid.UUID) (common.Stream, error) {
 	query := `
     select
-      m.id, m.stream_key, m.is_active, m.is_streaming
+      m.id, m.stream_key, m.is_active, m.is_streaming, m.user_account_id
     from multi_streams m
       where m.id = $1;
   `
 	var s common.Stream
 	err := common.DB.QueryRow(query, streamID).Scan(
-		&s.ID, &s.StreamKey, &s.IsActive, &s.IsStreaming,
+		&s.ID, &s.StreamKey, &s.IsActive, &s.IsStreaming, &s.User.ID,
 	)
 	if err != nil {
 		return s, err
@@ -38,13 +38,13 @@ func GetStreamByID(streamID uuid.UUID) (common.Stream, error) {
 func GetStreamByStreamKey(streamKey string) (common.Stream, error) {
 	query := `
     select
-      m.id, m.stream_key, m.is_active, m.is_streaming
+      m.id, m.stream_key, m.is_active, m.is_streaming, m.user_account_id
     from multi_streams m
       where m.stream_key = $1;
   `
 	var s common.Stream
 	err := common.DB.QueryRow(query, streamKey).Scan(
-		&s.ID, &s.StreamKey, &s.IsActive, &s.IsStreaming,
+		&s.ID, &s.StreamKey, &s.IsActive, &s.IsStreaming, &s.User.ID,
 	)
 	if err != nil {
 		return s, err
