@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"database/sql"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -50,6 +51,40 @@ func GetStreamByStreamKey(streamKey string) (common.Stream, error) {
 		return s, err
 	}
 	return s, nil
+}
+
+// GetStreamsOfUser returns all streams of a given user ID
+func GetStreamsOfUser(userID uuid.UUID) ([]common.Stream, error) {
+	query := `
+    select
+      m.id, m.stream_key, m.is_active, m.is_streaming
+    from multi_streams m
+      where m.user_account_id = $1;
+  `
+	var slist []common.Stream
+	rows, err := common.DB.Query(query, userID)
+	defer rows.Close()
+	if err == sql.ErrNoRows {
+		return slist, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var s common.Stream
+		err = rows.Scan(
+			&s.ID, &s.StreamKey, &s.IsActive, &s.IsStreaming,
+		)
+		if err != nil {
+			return nil, err
+		}
+		slist = append(slist, s)
+	}
+	err = rows.Err()
+	if err != nil {
+		return slist, err
+	}
+	return slist, nil
 }
 
 // CreateStream creates a new stream for a given user ID

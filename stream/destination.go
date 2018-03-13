@@ -33,6 +33,9 @@ func GetDestinations(streamID uuid.UUID) ([]common.Destination, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Unable to fetch destinations for stream")
 		}
+		if s, ok := Services[d.Service]; ok {
+			d.RTMPUrl = s.RTMPUrl(d.StreamKey, "default")
+		}
 		ds = append(ds, d)
 	}
 	err = rows.Err()
