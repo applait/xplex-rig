@@ -38,7 +38,7 @@ func Start() *mux.Router {
 
 	r.HandleFunc("/", homeHandler).Methods("GET")
 	accountHandler(r.PathPrefix("/accounts").Subrouter())
-	// StreamHandler(r.PathPrefix("/streams").Subrouter())
+	streamHandler(r.PathPrefix("/streams").Subrouter())
 	return r
 }
 
@@ -52,6 +52,11 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		"POST /accounts/auth/local - Authenticate using username and password",
 		"POST /accounts/invite - Create an invite for a new user account",
 		"POST /accounts/invite/verify - Verify an invite using email and invite token",
+		"POST /streams/ - Create new stream for current user",
+		"GET /streams/ - Get all streams configured for current user",
+		"GET /streams/{streamID} - Get details of specific stream",
+		"POST /streams/{streamID}/destination - Add a destination for a stream",
+		"POST /streams/{streamID}/changeKey - Update streaming key for an existing stream",
 	}
 	s.Send(w)
 }

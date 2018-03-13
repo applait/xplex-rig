@@ -46,7 +46,7 @@ type Destination struct {
 	ID        int64  `json:"id"`
 	Service   string `json:"service"`
 	StreamKey string `json:"streamKey"`
-	RTMPUrl   string `json:"rtmpUrl"`
+	RTMPUrl   string `json:"rtmpUrl,omitempty"`
 	IsActive  bool   `json:"isActive,omitempty"`
 }
 
@@ -75,11 +75,11 @@ type StreamProvision struct {
 
 // Stream represents a single multi-streaming configuration
 type Stream struct {
-	ID              uuid.UUID       `json:"id"`
-	StreamKey       string          `json:"streamKey"`
-	Destinations    []Destination   `json:"destinations"`
-	ProvisionStatus StreamProvision `json:"provisionStatus"`
-	IsStreaming     bool            `json:"isStreaming"`
-	User            UserAccount     `json:"user,omitempty"`
-	IsActive        bool            `json:"isActive,omitempty"`
+	ID              uuid.UUID        `json:"id"`
+	StreamKey       string           `json:"streamKey"`
+	Destinations    []Destination    `json:"destinations"`
+	ProvisionStatus *StreamProvision `json:"provisionStatus"`
+	IsStreaming     bool             `json:"isStreaming"`
+	User            UserAccount      `json:"-"`
+	IsActive        bool             `json:"isActive,omitempty"`
 }

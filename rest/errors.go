@@ -84,3 +84,11 @@ var ErrUpdateResource = Error{
 	ErrorCode: 1007,
 	Status:    http.StatusBadRequest,
 }
+
+// ErrGetResource is used where a request resource cannot be obtained. This can be due to server's internal failure or
+// some error in processing the request.
+var ErrGetResource = Error{
+	Message:   "Unable to fetch resource",
+	ErrorCode: 1008,
+	Status:    http.StatusBadRequest,
+}
