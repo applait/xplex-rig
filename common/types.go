@@ -4,6 +4,7 @@ package common
 
 import (
 	"database/sql"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -35,8 +36,8 @@ type UserAccount struct {
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password,omitempty"`
-	CreatedAt string    `json:"createdAt,omitempty"`
-	UpdatedAt string    `json:"updatedAt,omitempty"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	IsActive  bool      `json:"isActive,omitempty"`
 }
 
@@ -60,21 +61,22 @@ type Region struct {
 
 // EdgeServer represents a single edge server that ingests RTMP streams and pushes to Destination configured by a Stream
 type EdgeServer struct {
-	Hostname string `json:"hostname"`
-	Region   Region `json:"region"`
+	Hostname  string    `json:"hostname"`
+	Region    Region    `json:"region"`
+	LastCheck time.Time `json:"lastCheck"`
 }
 
 // StreamProvision represents provisioning information of a stream
 type StreamProvision struct {
-	Region Region     `json:"region"`
-	Server EdgeServer `json:"server"`
+	Region    Region     `json:"region"`
+	Server    EdgeServer `json:"server"`
+	StreamURL string     `json:"streamUrl"`
 }
 
 // Stream represents a single multi-streaming configuration
 type Stream struct {
 	ID              uuid.UUID       `json:"id"`
 	StreamKey       string          `json:"streamKey"`
-	StreamURL       string          `json:"streamUrl"`
 	Destinations    []Destination   `json:"destinations"`
 	ProvisionStatus StreamProvision `json:"provisionStatus"`
 	IsStreaming     bool            `json:"isStreaming"`

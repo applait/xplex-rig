@@ -27,7 +27,7 @@ func newUserToken(userid uuid.UUID, username string) (string, error) {
 			IssuedAt:  time.Now().Unix(),
 		},
 	}
-	utoken := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+	utoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return utoken.SignedString([]byte(common.Config.JWTKeys.Users))
 }
 
@@ -43,7 +43,7 @@ func NewInviteToken(senderid string, email string) (string, error) {
 			IssuedAt:  time.Now().Unix(),
 		},
 	}
-	utoken := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+	utoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return utoken.SignedString([]byte(common.Config.JWTKeys.Users))
 }
 
