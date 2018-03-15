@@ -39,12 +39,14 @@ func Start() *mux.Router {
 	r.HandleFunc("/", homeHandler).Methods("GET")
 	accountHandler(r.PathPrefix("/accounts").Subrouter())
 	streamHandler(r.PathPrefix("/streams").Subrouter())
+	agentHandler(r.PathPrefix("/agents").Subrouter())
 	return r
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	var s Success
 	s.Message = "xplex-rig HTTP API v1"
+	// TODO: This should send out data based on client access level
 	s.Payload = []string{
 		"GET / - Get list of api",
 		"POST /accounts/ - Create new user account",
@@ -57,6 +59,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		"GET /streams/{streamID} - Get details of specific stream",
 		"POST /streams/{streamID}/destination - Add a destination for a stream",
 		"POST /streams/{streamID}/changeKey - Update streaming key for an existing stream",
+		"GET /agents/config/{streamKey} - Get destinations for a given stream key",
 	}
 	s.Send(w)
 }

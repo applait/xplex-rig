@@ -92,3 +92,10 @@ var ErrGetResource = Error{
 	ErrorCode: 1008,
 	Status:    http.StatusBadRequest,
 }
+
+// ErrResourceInUse is used where a requested resource is already in use elsewhere. This is used to indicate a stream is already live or a destination is already receiving traffic.
+var ErrResourceInUse = Error{
+	Message:   "Resource is already in use",
+	ErrorCode: 1009,
+	Status:    http.StatusConflict,
+}
