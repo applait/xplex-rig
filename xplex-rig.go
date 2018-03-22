@@ -9,6 +9,7 @@ import (
 
 	"github.com/applait/xplex-rig/common"
 	"github.com/applait/xplex-rig/rest"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -36,6 +37,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error connecting to database. Reason: %s", err)
 	}
+
+	corsHandler := cors.Default().Handler(rest.Start())
+
 	log.Printf("Starting HTTP server on port %d", conf.Port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), rest.Start()))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), corsHandler))
 }
