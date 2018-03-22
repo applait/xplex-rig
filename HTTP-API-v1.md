@@ -409,3 +409,47 @@ These are the values of supported streaming services used in rig's API. These va
 - `Twitch`
 
 # Agents API
+
+This part of the API is reserved for agents. User clients cannot access agent endpoints. Authorization tokens for agent are obtained separately (TODO).
+
+## Stream config
+
+Get stream configuration by stream key.
+
+- URL: `/agents/config/{streamKey}`
+- Method: `GET`
+- Authorization required: Yes (Not implemented)
+
+**Success response payload:**
+
+Payload is an array of destination configurations in this format:
+
+- `id`: `number`. Destination ID
+- `service`: `string`. Service name for this destination
+- `streamKey`: `string`. The streaming key configured for this service.
+- `rtmpUrl`: `string`. A fully formed RTMP URL of the ingestion server of that service. This is what agent will use to stream to.
+- `isActive`: `boolean`. Determines whether this destination is active and should be streamed to.
+
+**Example success response:**
+
+```json
+{
+    "message": "Stream Config",
+    "payload": [
+        {
+            "id": 1,
+            "service": "YouTube",
+            "streamKey": "simaimsimim_siimimimiasdsr",
+            "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/simaimsimim_siimimimiasdsr",
+            "isActive": true
+        },
+        {
+            "id": 2,
+            "service": "Twitch",
+            "streamKey": "fxxbxx_live_moofooboo",
+            "rtmpUrl": "rtmp://live.twitch.tv/app/fxxbxx_live_moofooboo",
+            "isActive": true
+        }
+    ]
+}
+```
