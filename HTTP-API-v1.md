@@ -9,8 +9,17 @@ rig's HTTP API is the primary way through which clients and agents communicate w
     - [Response format](#response-format)
     - [Authorization](#authorization)
 - [**Accounts API**](#accounts-api)
+    - [Create account](#create-account)
+    - [Authenticate user](#authenticate-user)
+    - [Change password](#change-password)
 - [**Streams API**](#streams-api)
+    - [Create new stream](#create-new-stream)
+    - [Add stream destination](#add-stream-destination)
+    - [Change stream key](#change-stream-key)
+    - [Stream detail](#stream-detail)
+    - [List all streams](#list-all-streams)
 - [**Agents API**](#agents-api)
+    - [Stream config](#stream-config)
 
 # Introduction
 
@@ -78,45 +87,6 @@ Clients are user facing applications. This includes web app, desktop apps or any
 
 # Accounts API
 
-## Authenticate user
-
-Authenticate user using local authentication strategy, with username and password. This will give you the token you need to access rest of the restricted client APIs.
-
-- URL: `/accounts/auth/local`
-- Method: `POST`
-- Authorization required: No
-
-**Request params:**
-
-- `username`: `string`. Unique. Minimum 3 characters.
-- `password`: `string`. Minimum 8 characters.
-
-**Success response payload:**
-
-- `username`: `string`. User's chosen username.
-- `token`: `string`. Access token to use for requests that require authorization.
-
-**Example request body:**
-
-```json
-{
-    "username": "foobar",
-    "password": "Hop0nTh4tM4ng0Tree"
-}
-```
-
-**Example success response:**
-
-```json
-{
-    "message": "Authentication successful",
-    "payload": {
-        "username": "foobar",
-        "token": "xxxxxxxx.xxxxxxxx.xxxxxxx"
-    }
-}
-```
-
 ## Create account
 
 Create a new user account.
@@ -156,6 +126,45 @@ Create a new user account.
         "userID": "7217b0b6-d735-4ba9-bda8-419b1b397ede",
         "username": "foobar",
         "email": "foobar@fancycompany.net"
+    }
+}
+```
+
+## Authenticate user
+
+Authenticate user using local authentication strategy, with username and password. This will give you the token you need to access rest of the restricted client APIs.
+
+- URL: `/accounts/auth/local`
+- Method: `POST`
+- Authorization required: No
+
+**Request params:**
+
+- `username`: `string`. Unique. Minimum 3 characters.
+- `password`: `string`. Minimum 8 characters.
+
+**Success response payload:**
+
+- `username`: `string`. User's chosen username.
+- `token`: `string`. Access token to use for requests that require authorization.
+
+**Example request body:**
+
+```json
+{
+    "username": "foobar",
+    "password": "Hop0nTh4tM4ng0Tree"
+}
+```
+
+**Example success response:**
+
+```json
+{
+    "message": "Authentication successful",
+    "payload": {
+        "username": "foobar",
+        "token": "xxxxxxxx.xxxxxxxx.xxxxxxx"
     }
 }
 ```
@@ -250,7 +259,7 @@ Add a new egress destination for a stream. This should be used by clients when t
 
 **Request params:**
 
-- `service`: `string`. A valid value for a service supported by xplex. See [supported services][#supported-services] for detail.
+- `service`: `string`. A valid value for a service supported by xplex. See [supported services](#supported-services) for detail.
 - `streamKey`: `string`. The streaming key provided by that service.
 
 **Success response payload:**
