@@ -199,4 +199,213 @@ Used to change a logged in user's password. This is not forgot password endpoint
 
 # Streams API
 
+## Create new stream
+
+Create a new stream configuration for the current user and returns the stream data.
+
+- URL: `/streams/`
+- Method: `POST`
+- Authorization required: Yes
+
+**Request params:**
+
+None.
+
+**Success response payload:**
+
+- `id`: `string`. Stream's ID. This will be used for all stream related operations.
+- `streamKey`: `string`. The stream key that user puts in the URL of the stream.
+- `destinations`: `null`. Initially there will be no destinations set for the stream.
+- `provisionStatus`: `null`. Initially the stream will not be provisioned.
+- `isStreaming`: `boolean`. Initially `false`.
+- `isActive`: `boolean`. Initially `true`.
+
+**Example request body:**
+
+None.
+
+**Example success response:**
+
+```json
+{
+    "message": "New stream created",
+    "payload": {
+        "id": "30960952-cf23-46f8-bf91-9f738c27be2e",
+        "streamKey": "_mYrirpvU-OkH5LoVDci4g",
+        "destinations": null,
+        "provisionStatus": null,
+        "isStreaming": false,
+        "isActive": true
+    }
+}
+```
+
+## Add stream destination
+
+Add a new egress destination for a stream. This should be used by clients when they have stream key for a given service already available. This is not an OAuth interface.
+
+- URL: `/streams/{streamID}/destination`
+- Method: `POST`
+- Authorization required: Yes
+
+**Request params:**
+
+- `service`: `string`. A valid value for a service supported by xplex. See [supported services][#supported-services] for detail.
+- `streamKey`: `string`. The streaming key provided by that service.
+
+**Success response payload:**
+
+- `id`: `number`. Destinantion ID
+- `service`: `string`. The service value matching the request.
+- `streamKey`: `string`. The streaming key for that service matching the request.
+- `rtmpUrl`: `string`. A fully formed RTMP URL of the ingestion server of that service.
+- `isActive`: `boolean`. Initially `true`.
+
+**Example request body:**
+
+```json
+{
+    "service": "YouTube",
+    "streamKey": "simaimsimim_siimimimiasdsr"
+}
+```
+
+**Example success response:**
+
+```json
+{
+    "message": "Stream destination added",
+    "payload": {
+        "id": 1,
+        "service": "YouTube",
+        "streamKey": "simaimsimim_siimimimiasdsr",
+        "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/simaimsimim_siimimimiasdsr",
+        "isActive": true
+    }
+}
+```
+
+## Change stream key
+
+Change streaming key for a an existing xplex stream. This changes only the stream key used in xplex's streaming URL and does not change keys for any destinations for that stream.
+
+- URL: `/streams/{streamID}/changeKey`
+- Method: `POST`
+- Authorization required: Yes
+
+**Request params:**
+
+None.
+
+**Success response payload:**
+
+- `key`: `string`. The new stream key.
+- `streamID`: `string`. The stream ID for which the key was changed.
+
+**Example request body:**
+
+None.
+
+**Example success response:**
+
+```json
+{
+    "message": "New stream key",
+    "payload": {
+        "key": "_I55odu7WyOBlqkciXADiA",
+        "streamID": "30960952-cf23-46f8-bf91-9f738c27be2e"
+    }
+}
+```
+
+## Stream detail
+
+Get information for a specific stream of a user.
+
+- URL: `/streams/{streamID}`
+- Method: `GET`
+- Authorization required: Yes
+
+**Success response payload:**
+
+- `id`: `string`. Stream's ID.
+- `streamKey`: `string`. The stream key that user puts in the URL of the stream.
+- `destinations`: `array|null`. Destinations conffigured for the stream. Can be `null` if no destinations are found. When destinations are present, this is the structure of each item:
+    - `id`: `number`. Destinantion ID
+    - `service`: `string`. The service value matching the request.
+    - `streamKey`: `string`. The streaming key for that service matching the request.
+    - `rtmpUrl`: `string`. A fully formed RTMP URL of the ingestion server of that service.
+    - `isActive`: `boolean`. Initially `true`.
+- `provisionStatus`: `object|null`. Provision status of the stream
+- `isStreaming`: `boolean`. Whether the stream is currently live.
+- `isActive`: `boolean`. Whether the stream is active, implying whether this stream URL can be streamed to.
+
+**Example success response:**
+
+```json
+{
+    "message": "Stream detail",
+    "payload": {
+        "id": "30960952-cf23-46f8-bf91-9f738c27be2e",
+        "streamKey": "_I55odu7WyOBlqkciXADiA",
+        "destinations": [
+            {
+                "id": 1,
+                "service": "YouTube",
+                "streamKey": "simaimsimim_siimimimiasdsr",
+                "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/simaimsimim_siimimimiasdsr",
+                "isActive": true
+            }
+        ],
+        "provisionStatus": null,
+        "isStreaming": false,
+        "isActive": true
+    }
+}
+```
+
+## List all streams
+
+List all streams configured by current user.
+
+- URL: `/streams/`
+- Method: `GET`
+- Authorization required: Yes
+
+**Success response payload:**
+
+Payload is an array of these items:
+
+- `id`: `string`. Stream's ID.
+- `streamKey`: `string`. The stream key that user puts in the URL of the stream.
+- `destinations`: `null`.
+- `provisionStatus`: `null`.
+- `isStreaming`: `boolean`. Whether the stream is currently live.
+- `isActive`: `boolean`. Whether the stream is active, implying whether this stream URL can be streamed to.
+
+**Example success response:**
+
+```json
+{
+    "message": "Stream list for user",
+    "payload": [
+        {
+            "id": "30960952-cf23-46f8-bf91-9f738c27be2e",
+            "streamKey": "_I55odu7WyOBlqkciXADiA",
+            "destinations": null,
+            "provisionStatus": null,
+            "isStreaming": false,
+            "isActive": true
+        }
+    ]
+}
+```
+
+## Supported services
+
+These are the values of supported streaming services used in rig's API. These values are case-sensitive.
+
+- `YouTube`
+- `Twitch`
+
 # Agents API
