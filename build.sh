@@ -2,34 +2,34 @@
 
 set -e
 
-function cleanRebuild {
+cleanRebuild () {
     rm -f bin/xplex-rig
     mkdir -p bin/
 }
 
-function buildServerRelease {
+buildServerRelease () {
     echo "Building xplex-rig server release"
     CGO_ENABLED=0 GOOS=linux go build -o bin/xplex-rig -a -ldflags '-extldflags "-static"' .
     echo "Compiled to './bin/xplex-rig'"
 }
 
-function buildServerDev {
+buildServerDev () {
     echo "Building xplex-rig server dev"
     go build -o bin/xplex-rig .
     echo "Compiled to './bin/xplex-rig'"
 }
 
-function buildDev {
+buildDev () {
     cleanRebuild
     buildServerDev
 }
 
-function buildRelease {
+buildRelease () {
     cleanRebuild
     buildServerRelease
 }
 
-function migrate {
+migrate () {
   if [ -z ${DATABASE_URL+x} ] || [ -z ${DATABASE_URL} ]; then
     echo "Set Postgresql connection URI in the 'DATABASE_URL' environment variable"
     exit 1
