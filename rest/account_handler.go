@@ -70,8 +70,8 @@ func userCreate(w http.ResponseWriter, r *http.Request) {
 	s.Message = "User created"
 	s.Payload = map[string]string{
 		"userID":   u.ID.String(),
-		"username": r.FormValue("username"),
-		"email":    r.FormValue("email"),
+		"username": u.Username,
+		"email":    u.Email,
 	}
 	s.Send(w)
 }
@@ -139,7 +139,7 @@ func userAuth(w http.ResponseWriter, r *http.Request) {
 	var s Success
 	s.Message = "Authentication successful"
 	s.Payload = map[string]string{
-		"username": r.FormValue("username"),
+		"username": req.Username,
 		"token":    t,
 	}
 	s.Send(w)
