@@ -38,7 +38,20 @@ func main() {
 		log.Fatalf("Error connecting to database. Reason: %s", err)
 	}
 
-	corsHandler := cors.Default().Handler(rest.Start())
+	c := cors.New(cors.Options{
+		AllowCredentials: true,
+		AllowedMethods: []string{
+			"GET",
+			"POST",
+			"PATCH",
+			"DELETE",
+		},
+		AllowedHeaders: []string{
+			"Authorization",
+			"Content-Type",
+		},
+	})
+	corsHandler := c.Handler(rest.Start())
 
 	log.Printf("Starting HTTP server on port %d", conf.Port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), corsHandler))
